@@ -6,7 +6,7 @@
 <title>Yash Tapadiya | Software Engineer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@10..48,400;10..48,500;10..48,600;10..48,700;10..48,800&family=DM+Mono:ital,wght@0,300;0,400;1,300&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #080c10;
@@ -27,7 +27,7 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Manrope', sans-serif;
     font-weight: 300;
     overflow-x: hidden;
     cursor: none;
@@ -75,7 +75,7 @@
     border-bottom: 1px solid var(--border);
   }
   .nav-logo {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Bricolage Grotesque', sans-serif;
     font-size: 1.1rem; font-weight: 800;
     letter-spacing: 0.05em;
     color: var(--accent);
@@ -135,7 +135,7 @@
     opacity: 0; animation: fadeUp 0.8s 0.2s ease forwards;
   }
   .hero-name {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Bricolage Grotesque', sans-serif;
     font-size: clamp(3.5rem, 9vw, 8rem);
     font-weight: 800; line-height: 0.95;
     letter-spacing: -0.02em;
@@ -181,7 +181,7 @@
     opacity: 0; animation: fadeUp 0.8s 1s ease forwards;
   }
   .stat-num {
-    font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800;
+    font-family: 'Bricolage Grotesque', sans-serif; font-size: 2.2rem; font-weight: 800;
     color: var(--accent); line-height: 1;
   }
   .stat-label {
@@ -199,7 +199,7 @@
     color: var(--accent); letter-spacing: 0.1em;
   }
   .section-title {
-    font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 700;
+    font-family: 'Bricolage Grotesque', sans-serif; font-size: 2.2rem; font-weight: 700;
     line-height: 1;
   }
   .section-line { flex: 1; height: 1px; background: var(--border); }
@@ -229,7 +229,7 @@
   }
   .edu-card:hover::before { transform: scaleY(1); }
   .edu-card:hover { border-color: rgba(168,255,62,0.3); }
-  .edu-school { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
+  .edu-school { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1rem; font-weight: 700; }
   .edu-degree { color: #8a97a6; font-size: 0.85rem; margin-top: 0.25rem; }
   .edu-meta {
     display: flex; justify-content: space-between; margin-top: 0.75rem;
@@ -292,7 +292,7 @@
     content: ''; width: 6px; height: 6px;
     background: var(--accent); border-radius: 50%;
   }
-  .exp-company { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 700; }
+  .exp-company { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.3rem; font-weight: 700; }
   .exp-meta {
     display: flex; gap: 1.5rem; margin: 0.4rem 0 1rem;
     font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted);
@@ -333,7 +333,7 @@
     font-family: 'DM Mono', monospace; font-size: 0.65rem;
     color: var(--muted); letter-spacing: 0.15em; margin-bottom: 1rem;
   }
-  .project-name { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.8rem; }
+  .project-name { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.8rem; }
   .project-desc { color: #8a97a6; font-size: 0.88rem; line-height: 1.7; margin-bottom: 1.2rem; }
   .project-tech { display: flex; flex-wrap: wrap; gap: 0.4rem; }
   .tech-badge {
@@ -349,7 +349,7 @@
     text-align: center;
   }
   .contact-big {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Bricolage Grotesque', sans-serif;
     font-size: clamp(2.5rem, 7vw, 6rem);
     font-weight: 800; line-height: 1;
     margin-bottom: 1.5rem;
@@ -402,6 +402,229 @@
     .skills-grid { grid-template-columns: 1fr; }
     .hero-stats { flex-wrap: wrap; gap: 1.5rem; }
   }
+
+  /* Systems notebook direction */
+  :root {
+    --bg: #e9eef2;
+    --surface: #f7f8f5;
+    --surface2: #dce5ea;
+    --accent: #2457ff;
+    --accent2: #ff6b4a;
+    --text: #132238;
+    --muted: #637283;
+    --border: #b8c5cf;
+    --glow: rgba(36, 87, 255, 0.09);
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    cursor: auto;
+    font-family: 'Manrope', sans-serif;
+  }
+  body::before { opacity: 0.08; mix-blend-mode: multiply; }
+  .cursor, .cursor-ring { display: none; }
+  nav {
+    padding: 1.25rem 5vw;
+    background: rgba(233, 238, 242, 0.88);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+  }
+  .nav-logo { color: var(--accent); font-family: 'DM Mono', monospace; font-size: 0.9rem; }
+  .nav-links { gap: 1.8rem; }
+  .nav-links a, .nav-cta, .btn-primary, .btn-ghost, .contact-link {
+    font-family: 'DM Mono', monospace;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .nav-links a { color: var(--muted); }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-cta {
+    color: #fff;
+    background: var(--text);
+    padding: 0.65rem 1.15rem;
+  }
+  .nav-cta:hover { background: var(--accent); transform: none; }
+
+  .hero {
+    min-height: 100vh;
+    padding: 9rem 5vw 5rem;
+    justify-content: center;
+    background: var(--bg);
+  }
+  .hero-grid-bg {
+    background-image: linear-gradient(rgba(19,34,56,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(19,34,56,0.07) 1px, transparent 1px);
+    background-size: 36px 36px;
+    mask-image: linear-gradient(to bottom, black 0%, transparent 78%);
+  }
+  .hero-glow, .hero-glow2 { display: none; }
+  .hero::after {
+    content: 'BUILD / SHIP / LEARN';
+    position: absolute;
+    right: 5vw;
+    top: 10%;
+    width: min(18vw, 220px);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    outline: 1px solid rgba(36,87,255,0.28);
+    outline-offset: 16px;
+    font: 0.72rem 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+    transform: rotate(-14deg);
+    opacity: 0.78;
+  }
+  .hero-portrait {
+    position: absolute;
+    z-index: 0;
+    right: 10vw;
+    top: 54%;
+    width: clamp(220px, 23vw, 340px);
+    margin: 0;
+    padding: 0.7rem 0.7rem 0.9rem;
+    background: var(--surface);
+    border: 1px solid var(--text);
+    box-shadow: 12px 12px 0 var(--accent2);
+    transform: rotate(3deg);
+    opacity: 0;
+    animation: portraitReveal 0.9s 0.5s ease forwards;
+  }
+  .hero-portrait::before {
+    content: '';
+    position: absolute;
+    top: -0.7rem;
+    left: 1.2rem;
+    width: 4.5rem;
+    height: 1.4rem;
+    background: rgba(255,107,74,0.65);
+    transform: rotate(-4deg);
+  }
+  .hero-portrait img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    filter: saturate(0.82) contrast(1.04);
+  }
+  .hero-portrait figcaption {
+    padding-top: 0.65rem;
+    color: var(--muted);
+    font: 0.62rem 'DM Mono', monospace;
+    letter-spacing: 0;
+  }
+  .hero-tag {
+    color: var(--accent2);
+    font-size: 0.78rem;
+    letter-spacing: 0;
+    text-transform: none;
+    margin-bottom: 1.2rem;
+  }
+  .hero-name {
+    max-width: 720px;
+    color: var(--text);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: clamp(4.5rem, 12vw, 10rem);
+    line-height: 0.82;
+    letter-spacing: -0.07em;
+  }
+  .hero-name .line2 {
+    color: var(--accent);
+    -webkit-text-stroke: 0;
+  }
+  .hero-desc {
+    max-width: 540px;
+    margin-top: 2.5rem;
+    color: #405268;
+    font-size: 1.08rem;
+    line-height: 1.65;
+  }
+  .hero-actions { margin-top: 2rem; }
+  .btn-primary, .btn-ghost {
+    padding: 0.9rem 1.35rem;
+    font-size: 0.78rem;
+    border-radius: 2px;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--text); transform: translateY(-2px); }
+  .btn-ghost { color: var(--text); border-color: var(--text); }
+  .btn-ghost:hover { color: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
+  .hero-stats { gap: 2.5rem; margin-top: 4.5rem; }
+  .stat-num { color: var(--text); font-size: 2.1rem; }
+  .stat-label { color: var(--muted); letter-spacing: 0; text-transform: none; }
+
+  section { padding: 7rem 5vw; }
+  #about, #experience, #contact { background: var(--surface); }
+  #skills, #projects { background: var(--bg); }
+  .section-header { gap: 1rem; margin-bottom: 3.5rem; }
+  .section-num { color: var(--accent2); letter-spacing: 0; }
+  .section-title { font-size: 2.5rem; letter-spacing: -0.04em; }
+  .section-line { background: var(--border); }
+  .about-grid { gap: 7vw; }
+  .about-text p, .project-desc, .exp-bullets li { color: #405268; }
+  .about-highlight { border-left-color: var(--accent2); color: var(--accent2); }
+  .edu-cards { gap: 0.8rem; }
+  .edu-card, .skill-group, .project-card {
+    background: rgba(247,248,245,0.72);
+    border-color: var(--border);
+    border-radius: 2px;
+    box-shadow: 5px 5px 0 rgba(19,34,56,0.06);
+  }
+  .edu-card::before { background: var(--accent2); }
+  .edu-card:hover { border-color: var(--accent2); }
+  .edu-school, .exp-company, .project-name { color: var(--text); }
+  .edu-degree, .edu-meta, .skill-tag, .tech-badge { color: var(--muted); }
+  .skills-grid { gap: 1rem; }
+  .skill-group { padding: 1.5rem; }
+  .skill-group:hover, .project-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+  .skill-group-title { color: var(--accent); letter-spacing: 0; text-transform: none; }
+  .skill-tag { background: var(--surface2); border-color: transparent; border-radius: 2px; }
+  .skill-tag:hover { color: var(--accent); border-color: var(--accent); background: var(--glow); }
+  .exp-timeline::before { background: var(--border); }
+  .exp-dot { background: var(--surface); border-color: var(--accent); border-radius: 50%; }
+  .exp-dot::after { background: var(--accent2); }
+  .exp-meta { color: var(--muted); }
+  .exp-role-badge { background: var(--glow); border-color: rgba(36,87,255,0.25); color: var(--accent); }
+  .exp-bullets li::before { content: '↳'; color: var(--accent2); }
+  .project-card { padding: 1.8rem; }
+  .project-card-glow { display: none; }
+  .project-num { color: var(--accent2); letter-spacing: 0; }
+  .tech-badge { border-color: var(--border); border-radius: 2px; }
+  #contact { min-height: 70vh; text-align: left; align-items: flex-start; }
+  #contact .section-header { justify-content: flex-start !important; }
+  .contact-big { font-size: clamp(3.5rem, 9vw, 8rem); letter-spacing: -0.07em; }
+  .contact-big span { color: var(--accent); }
+  .contact-sub { margin-left: 0; color: #405268; }
+  .contact-links { justify-content: flex-start; }
+  .contact-link { color: var(--muted); border-color: var(--border); border-radius: 2px; }
+  .contact-link:hover { color: var(--accent); border-color: var(--accent); background: var(--glow); }
+  footer { background: var(--text); border-top: 0; color: #aab8c5; letter-spacing: 0; }
+  :focus-visible { outline: 3px solid var(--accent2); outline-offset: 4px; }
+  @media (max-width: 900px) {
+    .hero::after { opacity: 0.2; width: 170px; right: 1.5rem; top: 8%; }
+    .hero-portrait { right: 1.5rem; top: 49%; width: 190px; opacity: 0.24; animation: none; }
+  }
+  @media (max-width: 600px) {
+    .hero { padding-top: 8rem; }
+    .hero::after { width: 125px; top: 5rem; left: 1.5rem; right: auto; font-size: 0.54rem; opacity: 0.16; }
+    .hero-portrait { right: -1.5rem; top: 13.5rem; bottom: auto; width: 135px; box-shadow: 8px 8px 0 var(--accent2); }
+    .hero-name { font-size: clamp(3.3rem, 11vw, 4.5rem); }
+    .hero-desc { margin-top: 2rem; font-size: 1rem; }
+    .hero-stats { margin-top: 3rem; }
+    section { padding: 5rem 1.5rem; }
+    #contact { min-height: auto; }
+    .contact-big { font-size: clamp(2.8rem, 10vw, 4rem); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+  }
+  @keyframes portraitReveal {
+    from { opacity: 0; transform: translateY(18px) rotate(3deg); }
+    to { opacity: 1; transform: translateY(0) rotate(3deg); }
+  }
 </style>
 </head>
 <body>
@@ -428,6 +651,10 @@
   <div class="hero-grid-bg"></div>
   <div class="hero-glow"></div>
   <div class="hero-glow2"></div>
+  <figure class="hero-portrait">
+    <img src="data/dp.jpg" alt="Portrait of Yash Tapadiya">
+    <figcaption>Yash Tapadiya / software engineer</figcaption>
+  </figure>
   <div class="hero-tag">Software Engineer · Seattle, WA · Open to Full-Time Roles</div>
   <h1 class="hero-name">
     Yash<br>
@@ -606,7 +833,7 @@
       <div class="exp-company">Avaya</div>
       <div class="exp-meta">
         <span class="exp-role-badge">Software Development Engineer I (Full Stack Engineer)</span>
-        <span>07/2023 – 06/2024</span>
+        <span>07/2023 – 05/2024</span>
         <span>Pune, India</span>
       </div>
       <ul class="exp-bullets">
