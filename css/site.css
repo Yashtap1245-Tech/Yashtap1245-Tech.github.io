@@ -436,7 +436,7 @@ html[data-theme="light"] .status-dot {
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   margin-top: 2.75rem;
   border-top: 1px solid var(--line);
 }
