@@ -24,7 +24,7 @@ Fonts (Fraunces and Source Sans 3, SIL Open Font License), GSAP (GreenSock stand
 
 ## Motion and accessibility
 
-Smooth scrolling (Lenis), the hero canvas, a clay still-life on the right of the hero, the pinned skills reel, project tilt, magnetic buttons, and the custom cursor run on desktop when the visitor has not asked for reduced motion. The clay study is a small raymarched scene (not a Three.js bundle): it loads only on a fine desktop pointer, caps its pixel ratio, and pauses when the hero is offscreen. Phones, and `prefers-reduced-motion: reduce`, keep the flat hero. A light and dark theme toggle is in the header.
+Smooth scrolling (Lenis), the hero canvas, the pinned skills reel, project tilt, magnetic buttons, and the custom cursor run on desktop when the visitor has not asked for reduced motion. Phones, and `prefers-reduced-motion: reduce`, keep the flat hero. A light and dark theme toggle is in the header.
 
 ## Still worth adding
 

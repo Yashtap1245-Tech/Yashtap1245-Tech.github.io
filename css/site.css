@@ -342,31 +342,6 @@ html[data-theme="light"] .hero {
 
 html.is-live .sounding { display: block; }
 
-.clay {
-  display: none;
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: min(62%, 820px);
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
-}
-
-html.is-clay .clay { display: block; }
-
-html.is-clay .hero-shade {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--bg) 88%, transparent) 0%, transparent 34%);
-}
-
-html.is-clay .hero-portrait {
-  width: clamp(11.5rem, 18vw, 15.5rem);
-  justify-self: end;
-  align-self: end;
-  position: relative;
-  z-index: 3;
-}
-
 .hero-shade {
   position: absolute;
   inset: 0;
@@ -950,7 +925,6 @@ html[data-theme="light"] .status-dot {
   .hero-portrait img { width: 100%; }
   .hero-portrait figcaption { max-width: 16rem; }
   .hero-desc { order: 6; margin-top: 0.9rem; }
-  .clay { display: none !important; }
   .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem 0.35rem; }
   .stats li,
   .stats li + li { border-left: 0; padding-left: 0; padding-right: 0.45rem; }
@@ -974,7 +948,6 @@ html[data-theme="light"] .status-dot {
   .site-header,
   .cursor,
   .sounding,
-  .clay,
   .hero-shade,
   .skills-reel,
   .nav-toggle,
