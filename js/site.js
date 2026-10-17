@@ -475,7 +475,7 @@
         }
       });
 
-      const stopShader = initSounding();
+      const stopShader = startHeroVisual();
 
       document.querySelectorAll(".project").forEach(function (card) {
         const xTo = gsap.quickTo(card, "rotateY", { duration: 0.45, ease: "power3.out" });
@@ -520,6 +520,37 @@
     });
 
     window.addEventListener("load", function () { ScrollTrigger.refresh(); });
+  }
+
+  function startHeroVisual() {
+    const canvas = document.getElementById("clay");
+    let stopped = false;
+    let stopFn = null;
+
+    function boot(factory) {
+      if (stopped) return;
+      if (factory) {
+        try { stopFn = factory(canvas); } catch (err) { stopFn = null; }
+      }
+      if (!stopFn) stopFn = initSounding();
+    }
+
+    if (window.initClay) {
+      boot(window.initClay);
+    } else {
+      const script = document.createElement("script");
+      script.src = "js/clay.js";
+      script.async = true;
+      script.onload = function () { boot(window.initClay); };
+      script.onerror = function () { boot(null); };
+      document.body.appendChild(script);
+    }
+
+    return function stop() {
+      stopped = true;
+      if (stopFn) stopFn();
+      stopFn = null;
+    };
   }
 
   initCursor();
