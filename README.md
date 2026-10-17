@@ -32,4 +32,4 @@ The redesign keeps the existing copy, projects, experience, and links. A few thi
 
 - A resume PDF. There is no file to link, so the page does not pretend there is a download. Add `resume.pdf` at the root and a “Resume” link in the hero when it exists.
 - Project images, live URLs, and repository links for the four projects.
-- The current portrait (`data/dp.jpg`) is a casual outdoor photo. A tighter headshot will read more clearly at small sizes.
+- The hero portrait is a tighter crop of the outdoor photo (`data/dp.jpg`, served as `data/portrait.webp` with a JPEG fallback). A studio headshot would still read more clearly at small sizes.
