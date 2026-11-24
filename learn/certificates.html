@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" class="no-js" data-lesson="certificates">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    document.documentElement.classList.remove("no-js");
+    try {
+      var savedTheme = localStorage.getItem("yt-theme");
+      if (savedTheme === "light" || savedTheme === "dark") {
+        document.documentElement.setAttribute("data-theme", savedTheme);
+      }
+    } catch (err) {}
+  </script>
+  <title>How a certificate earns trust — Learn with Me</title>
+  <meta name="description" content="Learn how browsers check a certificate chain: signatures, subject alternative names, dates, revocation, and the local root store.">
+  <meta name="author" content="Yash Tapadiya">
+  <meta name="theme-color" content="#0f1815">
+  <link rel="canonical" href="https://yashtap1245-tech.github.io/learn/certificates.html">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:site_name" content="Yash Tapadiya">
+  <meta property="og:title" content="How a certificate earns trust — Learn with Me">
+  <meta property="og:description" content="Learn how browsers check a certificate chain: signatures, subject alternative names, dates, revocation, and the local root store.">
+  <meta property="og:url" content="https://yashtap1245-tech.github.io/learn/certificates.html">
+  <meta property="og:image" content="https://yashtap1245-tech.github.io/data/portrait.jpg">
+  <meta property="og:image:alt" content="Portrait of Yash Tapadiya">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="How a certificate earns trust — Learn with Me">
+  <meta name="twitter:description" content="Learn how browsers check a certificate chain: signatures, subject alternative names, dates, revocation, and the local root store.">
+  <meta name="twitter:image" content="https://yashtap1245-tech.github.io/data/portrait.jpg">
+  <link rel="preload" href="../fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../fonts/source-sans-3.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../css/site.css">
+  <link rel="stylesheet" href="css/learn.css">
+  
+  <script type="application/ld+json">
+  {
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "How a certificate earns trust",
+  "description": "Learn how browsers check a certificate chain: signatures, subject alternative names, dates, revocation, and the local root store.",
+  "url": "https://yashtap1245-tech.github.io/learn/certificates.html",
+  "isAccessibleForFree": true,
+  "inLanguage": "en",
+  "learningResourceType": "lesson",
+  "teaches": "Certificate chains, signatures, names, expiry, and revocation",
+  "author": {
+    "@type": "Person",
+    "name": "Yash Tapadiya",
+    "url": "https://yashtap1245-tech.github.io/"
+  }
+}
+  </script>
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="site-header" id="site-header">
+    <a class="logo" href="../">Yash Tapadiya</a>
+    <nav class="site-nav" id="site-nav" aria-label="Sections">
+      <ul class="nav-links">
+        <li><a href="../#about">About</a></li>
+        <li><a href="../#skills">Skills</a></li>
+        <li><a href="../#experience">Experience</a></li>
+        <li><a href="../#projects">Projects</a></li>
+        <li><a href="index.html" aria-current="page">Learn with Me</a></li>
+        <li><a href="../#contact">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false" aria-label="Switch to light mode">
+        <span class="theme-toggle-label">Light</span>
+      </button>
+      <a class="btn btn-primary nav-hire" href="mailto:yashtap1245@gmail.com">Contact Me</a>
+      <button type="button" class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    </div>
+    <div class="scroll-progress" aria-hidden="true"><span id="scroll-progress"></span></div>
+  </header>
+  <main id="content" tabindex="-1">
+    <div class="learn-layout">
+      <nav class="course-nav" aria-label="Lessons">
+        <p>Lessons</p>
+        <ol>
+          <li><a href="dns.html">URL lookup</a></li>
+          <li><a href="tcp.html">TCP</a></li>
+          <li><a href="tls.html">TLS</a></li>
+          <li><a href="certificates.html" aria-current="page">Certificates</a></li>
+          <li><a href="hashing.html">Hashing</a></li>
+          <li><a href="encryption.html">Encryption</a></li>
+        </ol>
+      </nav>
+      <article>
+        <header class="lesson-intro">
+          <p class="lesson-kicker">Lesson 4 of 6</p>
+          <h1>How a certificate earns trust</h1>
+          <p class="lede">TLS asked the server to prove its name. The proof is a certificate chain the browser can check on its own. A certificate is a signed claim about a public key. It is not a review of the website.</p>
+          <ul class="learn-points">
+          <li>What a leaf, an intermediate, and a root each do</li>
+          <li>How a signature, a name, and a pair of dates are checked</li>
+          <li>Why a certificate can be rejected while it still looks official</li>
+          </ul>
+        </header>
+        <div class="stage">
+          <div class="diagram-panel">
+            <div id="diagram" aria-hidden="true"></div>
+            <p id="diagram-caption" class="diagram-caption"></p>
+          </div>
+          <div class="step-column">
+            <div id="step-live">
+              <p id="step-count" class="step-count" aria-live="polite"></p>
+              <div id="steps">
+          <section class="step is-current" data-frame="claim">
+            <h2>A certificate is a signed claim</h2>
+            <p>A certificate binds a public key to a name, for a span of dates, and carries the issuer's signature over those fields. It says this issuer asserts that this public key belongs with this name. It does not say the page is honest, fast, or free of bugs.</p>
+            <p>The check uses the subject alternative name, the validity dates, the public key, the issuer, and the signature. The signed body is fixed before the signature is attached. Change a letter and the signature fails. The names in this lesson are a teaching chain, not a real certificate.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> A certificate says a key belongs with a name. It is not a review of the page.</p>
+          </section>
+          <section class="step" data-frame="chain">
+            <h2>Leaf, intermediate, root</h2>
+            <p>The server presents the leaf for <code>example.com</code> and one or more intermediates. The leaf is signed by an intermediate. That intermediate is signed by a root. The root is in the browser or the operating-system trust store.</p>
+            <p>The server usually does not send the root. Sending a root in the handshake would not make it trusted. Trust starts from a root the browser already has, then follows signatures down to the leaf.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> Trust runs from a root you already have, through signatures, to the leaf.</p>
+          </section>
+          <section class="step" data-frame="signature">
+            <h2>Check the signatures upward</h2>
+            <p>The browser hashes the certificate body and checks the signature with the issuer's public key. It does this for the leaf, using the intermediate's key, then for the intermediate, using the root's key. RFC 5280 is the certificate profile these checks follow.</p>
+            <p>The root is trusted because it was installed, not because a server vouched for it just now. A normal leaf is not allowed to sign other certificates. An intermediate carries a basic constraint that marks it as a CA, and that flag is part of the check.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> Each signature must verify with the next key up. The root is local trust.</p>
+          </section>
+          <section class="step" data-frame="name">
+            <h2>The name and the dates have to match</h2>
+            <p>A real CA's signature is not enough. The certificate has to name the host in the URL. Modern browsers compare that host to the subject alternative name. A common name by itself does not pass.</p>
+            <p>A wildcard such as <code>*.example.com</code> covers one label, for example <code>www.example.com</code>. It does not cover <code>example.com</code>, and it does not cover <code>a.b.example.com</code>. The dates have to contain the current time. Outside <code>notBefore</code> and <code>notAfter</code>, the browser rejects the certificate even when the signature is perfect.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> The chain can be valid and still be the wrong name, or the right name at the wrong time.</p>
+          </section>
+          <section class="step" data-frame="revoke">
+            <h2>A certificate can be withdrawn early</h2>
+            <p>A private key can leak while the dates are still valid. The CA revokes the certificate. Browsers learn that from a certificate revocation list, or from OCSP, a status check defined in RFC 6960.</p>
+            <p>Asking the CA about every site would be slow, and it would tell the CA which sites you open. OCSP stapling lets the server attach a fresh signed status to the handshake, so the browser can check revocation without a separate call.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> Expiry is a deadline. Revocation is an early withdrawal, and it has to be signed.</p>
+          </section>
+          <section class="step" data-frame="fail">
+            <h2>When the browser stops</h2>
+            <p>The usual failures are specific. The name does not match. The certificate is outside its dates. The chain does not end at a trusted root. The certificate is revoked. A self-signed certificate is signed by its own key. Unless you installed that key as a trust anchor, there is no path to a root you trust.</p>
+            <p>Clicking through the warning tells the browser to accept an unauthenticated server for that site. The channel is then private only to whoever presented the certificate, which may not be the site you wanted.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> The warning means a check failed. The lock icon is those checks, not a general promise.</p>
+          </section>
+          <section class="step" data-frame="recap">
+            <h2>A chain back to a root you have</h2>
+            <p>Build a chain to a local root, verify each signature, match the name, check the dates, and check revocation. TLS used that result when it accepted CertificateVerify.</p>
+            <p>Signatures are computed over a hash of the certificate body. The next lesson is what a hash promises, and what it does not.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> Trust is a chain of signatures back to a root the browser already has.</p>
+          </section>
+              </div>
+            </div>
+            <div class="controls">
+              <button type="button" id="prev">Previous</button>
+              <button type="button" id="replay">Replay</button>
+              <button type="button" id="play" aria-pressed="false">Play</button>
+              <button type="button" id="next" class="is-primary">Next</button>
+            </div>
+            <p class="control-hint">Arrow keys move between steps while a control in this lesson is focused.</p>
+            <ol class="stepper" id="stepper" aria-label="Steps"></ol>
+          </div>
+        </div>
+
+        <section class="takeaways" id="takeaways" aria-labelledby="takeaways-title">
+          <h2 id="takeaways-title">Takeaways</h2>
+          <ul>
+          <li>A certificate binds a public key to a name and a pair of dates. The issuer signs that claim.</li>
+          <li>Browsers trust a root because it is in the local trust store, then check each signature down to the leaf.</li>
+          <li>The name has to match the URL, the dates have to be current, and revocation can withdraw a certificate early.</li>
+          </ul>
+        </section>
+        <section class="quiz" id="quiz" aria-labelledby="quiz-title">
+          <h2 id="quiz-title" tabindex="-1">Check yourself</h2>
+        <fieldset data-answer="store" data-why="The root is a trust anchor installed in the browser or the operating system. A website cannot appoint its own root by sending one.">
+          <legend>Why does a browser trust a root CA?</legend>
+            <label><input type="radio" name="cert-q1" value="store"> Because that root's certificate is in the local trust store</label>
+            <label><input type="radio" name="cert-q1" value="says"> Because the website says the issuer is trustworthy</label>
+            <label><input type="radio" name="cert-q1" value="never"> Because root certificates never expire</label>
+        </fieldset>
+        <fieldset data-answer="san" data-why="The subject alternative name is the name that has to match. A common name alone is not enough.">
+          <legend>Which name does a modern browser compare with the host in the URL?</legend>
+            <label><input type="radio" name="cert-q2" value="cn"> Only the common name</label>
+            <label><input type="radio" name="cert-q2" value="san"> The subject alternative name</label>
+            <label><input type="radio" name="cert-q2" value="org"> The issuer's organization field</label>
+        </fieldset>
+        <fieldset data-answer="signed" data-why="The issuer's private key signed this certificate body. It does not review the site's contents or make the connection faster.">
+          <legend>A certificate signature proves which statement?</legend>
+            <label><input type="radio" name="cert-q3" value="signed"> The issuer's private key signed this certificate body</label>
+            <label><input type="radio" name="cert-q3" value="malware"> The site contains no malware</label>
+            <label><input type="radio" name="cert-q3" value="fast"> The connection will be fast</label>
+        </fieldset>
+          <button type="button" class="btn btn-primary" data-quiz>Check answers</button>
+          <p class="quiz-result" role="status"></p>
+        </section>
+        <p class="sources">Sources: <a href="https://www.rfc-editor.org/rfc/rfc5280" target="_blank" rel="noopener noreferrer">RFC 5280</a> · <a href="https://www.rfc-editor.org/rfc/rfc6125" target="_blank" rel="noopener noreferrer">RFC 6125</a> · <a href="https://www.rfc-editor.org/rfc/rfc6960" target="_blank" rel="noopener noreferrer">RFC 6960</a> · <a href="https://developer.mozilla.org/en-US/docs/Glossary/Certificate_authority" target="_blank" rel="noopener noreferrer">MDN: Certificate authority</a>. Pictures use small stand-in numbers so the steps are easy to see. They are teaching models, not a packet capture.</p>
+        <nav class="pager" aria-label="More lessons">
+          <a href="tls.html">Previous · How TLS builds a private channel</a>
+          <a href="hashing.html">Next · What a hash actually promises</a>
+        </nav>
+      </article>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© 2026 Yash Tapadiya · <a href="../">Portfolio</a> · Learn with Me</p>
+    </div>
+  </footer>
+  <script src="js/learn.js"></script>
+</body>
+</html>

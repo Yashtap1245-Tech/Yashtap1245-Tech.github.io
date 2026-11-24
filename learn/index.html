@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" class="no-js">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    document.documentElement.classList.remove("no-js");
+    try {
+      var savedTheme = localStorage.getItem("yt-theme");
+      if (savedTheme === "light" || savedTheme === "dark") {
+        document.documentElement.setAttribute("data-theme", savedTheme);
+      }
+    } catch (err) {}
+  </script>
+  <title>Learn with Me — Yash Tapadiya</title>
+  <meta name="description" content="A free visual course on DNS, TCP, TLS, certificates, hashing, and encryption. Step through each idea in the browser.">
+  <meta name="author" content="Yash Tapadiya">
+  <meta name="theme-color" content="#0f1815">
+  <link rel="canonical" href="https://yashtap1245-tech.github.io/learn/">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:site_name" content="Yash Tapadiya">
+  <meta property="og:title" content="Learn with Me — Yash Tapadiya">
+  <meta property="og:description" content="A free visual course on DNS, TCP, TLS, certificates, hashing, and encryption. Step through each idea in the browser.">
+  <meta property="og:url" content="https://yashtap1245-tech.github.io/learn/">
+  <meta property="og:image" content="https://yashtap1245-tech.github.io/data/portrait.jpg">
+  <meta property="og:image:alt" content="Portrait of Yash Tapadiya">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Learn with Me — Yash Tapadiya">
+  <meta name="twitter:description" content="A free visual course on DNS, TCP, TLS, certificates, hashing, and encryption. Step through each idea in the browser.">
+  <meta name="twitter:image" content="https://yashtap1245-tech.github.io/data/portrait.jpg">
+  <link rel="preload" href="../fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../fonts/source-sans-3.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../css/site.css">
+  <link rel="stylesheet" href="css/learn.css">
+  
+  <script type="application/ld+json">
+  {
+  "@context": "https://schema.org",
+  "@type": "Course",
+  "name": "Learn with Me",
+  "description": "A free visual course on DNS, TCP, TLS, certificates, hashing, and encryption.",
+  "url": "https://yashtap1245-tech.github.io/learn/",
+  "isAccessibleForFree": true,
+  "inLanguage": "en",
+  "provider": {
+    "@type": "Person",
+    "name": "Yash Tapadiya",
+    "url": "https://yashtap1245-tech.github.io/"
+  }
+}
+  </script>
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="site-header" id="site-header">
+    <a class="logo" href="../">Yash Tapadiya</a>
+    <nav class="site-nav" id="site-nav" aria-label="Sections">
+      <ul class="nav-links">
+        <li><a href="../#about">About</a></li>
+        <li><a href="../#skills">Skills</a></li>
+        <li><a href="../#experience">Experience</a></li>
+        <li><a href="../#projects">Projects</a></li>
+        <li><a href="index.html" aria-current="page">Learn with Me</a></li>
+        <li><a href="../#contact">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false" aria-label="Switch to light mode">
+        <span class="theme-toggle-label">Light</span>
+      </button>
+      <a class="btn btn-primary nav-hire" href="mailto:yashtap1245@gmail.com">Contact Me</a>
+      <button type="button" class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    </div>
+    <div class="scroll-progress" aria-hidden="true"><span id="scroll-progress"></span></div>
+  </header>
+  <main id="content" tabindex="-1">
+    <div class="learn-home">
+      <div class="wrap">
+        <h1>Learn with Me</h1>
+        <p class="lede">Six short lessons on how a connection is made, and how it becomes private. Each one is a picture you step through. The cryptography runs in your browser.</p>
+        <p class="course-note">No account. No install. Progress stays in this browser. The numbers in the diagrams are teaching stand-ins, and each lesson links the specification it follows.</p>
+        <p class="course-progress" id="course-progress">No lessons completed on this browser yet.</p>
+        <ol class="lesson-index" id="lesson-index">
+        <li data-lesson="dns" data-steps="8">
+          <a href="dns.html">
+            <span class="lesson-num">1</span>
+            <span>
+              <span class="lesson-name">What happens when you type a URL</span>
+              <span class="lesson-blurb">A name in the address bar becomes an IP address.</span>
+            </span>
+            <span class="lesson-state" data-state>Not started</span>
+          </a>
+        </li>
+        <li data-lesson="tcp" data-steps="8">
+          <a href="tcp.html">
+            <span class="lesson-num">2</span>
+            <span>
+              <span class="lesson-name">How TCP carries a conversation</span>
+              <span class="lesson-blurb">Layers, ports, the three-way handshake, retransmission, and close.</span>
+            </span>
+            <span class="lesson-state" data-state>Not started</span>
+          </a>
+        </li>
+        <li data-lesson="tls" data-steps="8">
+          <a href="tls.html">
+            <span class="lesson-num">3</span>
+            <span>
+              <span class="lesson-name">How TLS builds a private channel</span>
+              <span class="lesson-blurb">The TLS 1.3 handshake, and what an observer can still see.</span>
+            </span>
+            <span class="lesson-state" data-state>Not started</span>
+          </a>
+        </li>
+        <li data-lesson="certificates" data-steps="7">
+          <a href="certificates.html">
+            <span class="lesson-num">4</span>
+            <span>
+              <span class="lesson-name">How a certificate earns trust</span>
+              <span class="lesson-blurb">Chains, signatures, names, dates, and revocation.</span>
+            </span>
+            <span class="lesson-state" data-state>Not started</span>
+          </a>
+        </li>
+        <li data-lesson="hashing" data-steps="6">
+          <a href="hashing.html">
+            <span class="lesson-num">5</span>
+            <span>
+              <span class="lesson-name">What a hash actually promises</span>
+              <span class="lesson-blurb">SHA-256, the avalanche effect, salts, and slow password hashes.</span>
+            </span>
+            <span class="lesson-state" data-state>Not started</span>
+          </a>
+        </li>
+        <li data-lesson="encryption" data-steps="8">
+          <a href="encryption.html">
+            <span class="lesson-num">6</span>
+            <span>
+              <span class="lesson-name">Hiding data, and proving who sent it</span>
+              <span class="lesson-blurb">AES-GCM, Diffie-Hellman, and digital signatures.</span>
+            </span>
+            <span class="lesson-state" data-state>Not started</span>
+          </a>
+        </li>
+        </ol>
+      </div>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© 2026 Yash Tapadiya · <a href="../">Portfolio</a> · Learn with Me</p>
+    </div>
+  </footer>
+  <script src="js/learn.js"></script>
+</body>
+</html>

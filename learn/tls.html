@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" class="no-js" data-lesson="tls">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    document.documentElement.classList.remove("no-js");
+    try {
+      var savedTheme = localStorage.getItem("yt-theme");
+      if (savedTheme === "light" || savedTheme === "dark") {
+        document.documentElement.setAttribute("data-theme", savedTheme);
+      }
+    } catch (err) {}
+  </script>
+  <title>How TLS builds a private channel — Learn with Me</title>
+  <meta name="description" content="Walk the TLS 1.3 handshake: ClientHello, ServerHello, encrypted certificates, Finished, and how that differs from TLS 1.2.">
+  <meta name="author" content="Yash Tapadiya">
+  <meta name="theme-color" content="#0f1815">
+  <link rel="canonical" href="https://yashtap1245-tech.github.io/learn/tls.html">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:site_name" content="Yash Tapadiya">
+  <meta property="og:title" content="How TLS builds a private channel — Learn with Me">
+  <meta property="og:description" content="Walk the TLS 1.3 handshake: ClientHello, ServerHello, encrypted certificates, Finished, and how that differs from TLS 1.2.">
+  <meta property="og:url" content="https://yashtap1245-tech.github.io/learn/tls.html">
+  <meta property="og:image" content="https://yashtap1245-tech.github.io/data/portrait.jpg">
+  <meta property="og:image:alt" content="Portrait of Yash Tapadiya">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="How TLS builds a private channel — Learn with Me">
+  <meta name="twitter:description" content="Walk the TLS 1.3 handshake: ClientHello, ServerHello, encrypted certificates, Finished, and how that differs from TLS 1.2.">
+  <meta name="twitter:image" content="https://yashtap1245-tech.github.io/data/portrait.jpg">
+  <link rel="preload" href="../fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../fonts/source-sans-3.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../css/site.css">
+  <link rel="stylesheet" href="css/learn.css">
+  
+  <script type="application/ld+json">
+  {
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "How TLS builds a private channel",
+  "description": "Walk the TLS 1.3 handshake: ClientHello, ServerHello, encrypted certificates, Finished, and how that differs from TLS 1.2.",
+  "url": "https://yashtap1245-tech.github.io/learn/tls.html",
+  "isAccessibleForFree": true,
+  "inLanguage": "en",
+  "learningResourceType": "lesson",
+  "teaches": "The TLS 1.3 handshake and what it hides",
+  "author": {
+    "@type": "Person",
+    "name": "Yash Tapadiya",
+    "url": "https://yashtap1245-tech.github.io/"
+  }
+}
+  </script>
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="site-header" id="site-header">
+    <a class="logo" href="../">Yash Tapadiya</a>
+    <nav class="site-nav" id="site-nav" aria-label="Sections">
+      <ul class="nav-links">
+        <li><a href="../#about">About</a></li>
+        <li><a href="../#skills">Skills</a></li>
+        <li><a href="../#experience">Experience</a></li>
+        <li><a href="../#projects">Projects</a></li>
+        <li><a href="index.html" aria-current="page">Learn with Me</a></li>
+        <li><a href="../#contact">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false" aria-label="Switch to light mode">
+        <span class="theme-toggle-label">Light</span>
+      </button>
+      <a class="btn btn-primary nav-hire" href="mailto:yashtap1245@gmail.com">Contact Me</a>
+      <button type="button" class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    </div>
+    <div class="scroll-progress" aria-hidden="true"><span id="scroll-progress"></span></div>
+  </header>
+  <main id="content" tabindex="-1">
+    <div class="learn-layout">
+      <nav class="course-nav" aria-label="Lessons">
+        <p>Lessons</p>
+        <ol>
+          <li><a href="dns.html">URL lookup</a></li>
+          <li><a href="tcp.html">TCP</a></li>
+          <li><a href="tls.html" aria-current="page">TLS</a></li>
+          <li><a href="certificates.html">Certificates</a></li>
+          <li><a href="hashing.html">Hashing</a></li>
+          <li><a href="encryption.html">Encryption</a></li>
+        </ol>
+      </nav>
+      <article>
+        <header class="lesson-intro">
+          <p class="lesson-kicker">Lesson 3 of 6</p>
+          <h1>How TLS builds a private channel</h1>
+          <p class="lede">TCP can deliver every byte in order while anyone on the path reads or changes it. TLS 1.3 turns that pipe into an encrypted, integrity-checked channel, and the server proves its name. This is the current version of the protocol, RFC 8446.</p>
+          <ul class="learn-points">
+          <li>What ClientHello and ServerHello actually exchange</li>
+          <li>Why the TLS 1.3 certificate is encrypted, and what Finished checks</li>
+          <li>What a network observer can still see, including SNI</li>
+          </ul>
+        </header>
+        <div class="stage">
+          <div class="diagram-panel">
+            <div id="diagram" aria-hidden="true"></div>
+            <p id="diagram-caption" class="diagram-caption"></p>
+          </div>
+          <div class="step-column">
+            <div id="step-live">
+              <p id="step-count" class="step-count" aria-live="polite"></p>
+              <div id="steps">
+          <section class="step is-current" data-frame="shared">
+            <h2>The path is shared</h2>
+            <p>Between your machine and the server are routers, and often a café network or a company proxy. TCP does not stop those machines from reading the payload. The IP address is on every packet. DNS has already turned the name into that address.</p>
+            <p>TLS has three jobs: hide the contents, detect tampering, and check that the server is the one named in the URL. This lesson follows HTTPS on TCP, still a common path. HTTP/3 carries the same TLS ideas inside QUIC, on UDP, rather than as a separate layer on top of TCP.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> A reliable connection is not a private one.</p>
+          </section>
+          <section class="step" data-frame="clienthello">
+            <h2>ClientHello offers the terms</h2>
+            <p>The browser sends ClientHello first. It carries a random nonce, the TLS versions it will accept, a list of cipher suites, a Diffie-Hellman key share (often the group X25519), the signature algorithms it can check, and the server name in the SNI extension.</p>
+            <p>SNI tells a server that hosts many sites which certificate to present. In the usual handshake that name is readable on the network. Encrypted Client Hello exists, and most connections do not use it yet. TLS hides the page. It does not, by itself, hide which site you asked for.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> ClientHello is an offer: versions, ciphers, a key share, and the site name.</p>
+          </section>
+          <section class="step" data-frame="serverhello">
+            <h2>ServerHello locks in a shared secret</h2>
+            <p>The server chooses a version and a cipher and sends its own key share in ServerHello. TLS 1.3 requires implementations to support <code>TLS_AES_128_GCM_SHA256</code>. A typical handshake selects that suite, or another AEAD suite such as AES-256-GCM or ChaCha20-Poly1305.</p>
+            <p>Each side combines its private key share with the other side's public key share. Ephemeral Diffie-Hellman gives them the same shared secret, and the private shares are never sent. If those private shares are thrown away, a recording of today's handshake does not reveal the secret later. That is forward secrecy. TLS then stretches the secret with HKDF into separate keys, so handshake messages and application data do not share a key.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> The two key shares create one shared secret. The private halves never cross the network.</p>
+          </section>
+          <section class="step" data-frame="cert">
+            <h2>The certificate arrives encrypted</h2>
+            <p>Everything after ServerHello is encrypted with the handshake keys. The server sends EncryptedExtensions, including ALPN, where the two sides can agree on HTTP/2 or another application protocol. Then it sends Certificate, CertificateVerify, and Finished.</p>
+            <p>Certificate carries the leaf and, usually, the intermediates. It does not need to carry the root. The browser already has roots in its trust store, and a root that arrives in the handshake is not what makes a root trusted. CertificateVerify is a signature over the handshake transcript, made with the private key that matches the certificate. Possessing a copy of the certificate is not enough. The server has to prove it holds the private key.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> In TLS 1.3 the certificate is encrypted, and a signature proves the server holds the private key.</p>
+          </section>
+          <section class="step" data-frame="finished">
+            <h2>Finished locks the transcript</h2>
+            <p>The server's Finished is a MAC over everything in the handshake so far, using a key derived from the shared secret. The browser checks it, then sends its own Finished. If the transcripts match, both sides are confirmed to hold the same keys.</p>
+            <p>In the common case this is one round trip: ClientHello out, the server's flight back, and the browser's Finished, which can travel with the first HTTP request. There is also a 0-RTT mode that sends application data with ClientHello. Those early bytes are not forward secret, and they can be replayed. A normal page load does not need that mode.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> Finished means both sides saw the same handshake and hold the same keys.</p>
+          </section>
+          <section class="step" data-frame="http">
+            <h2>The request rides inside</h2>
+            <p>The browser now sends the request for <code>/docs</code>, headers included, as TLS application data under the application traffic keys. The response comes back the same way. An observer can see sizes and timing. They cannot read the path, the headers, or the body, and a changed byte fails the authentication tag.</p>
+            <p>When the session ends, TLS sends <code>close_notify</code> so a cutoff is not mistaken for a clean end. TCP then runs the shutdown from the previous lesson.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> HTTP is the message. TLS is the sealed envelope it travels in.</p>
+          </section>
+          <section class="step" data-frame="tls12">
+            <h2>What TLS 1.2 did differently</h2>
+            <p>Older write-ups describe a different handshake. TLS 1.2 often took two round trips, and the certificate was visible before encryption began. Some suites used RSA key transport: the client encrypted a premaster secret to the server's long-term public key. Those suites have no forward secrecy.</p>
+            <p>TLS 1.3 removes static RSA key transport. Key agreement is ephemeral Diffie-Hellman, and the records use an AEAD cipher. If a picture shows the certificate in the clear, check which version it is teaching.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> TLS 1.3 encrypts the certificate and drops key exchange that cannot provide forward secrecy.</p>
+          </section>
+          <section class="step" data-frame="recap">
+            <h2>Keys, then proof, then the page</h2>
+            <p>ClientHello offers a key share and names the site. ServerHello answers with a key share. Both sides derive keys. The certificate and a signature arrive encrypted. Finished confirms the transcript. HTTP follows inside.</p>
+            <p>The next lesson is the certificate itself: the chain, the name check, the dates, and revocation.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> The handshake agrees on keys and checks the server. The page comes after.</p>
+          </section>
+              </div>
+            </div>
+            <div class="controls">
+              <button type="button" id="prev">Previous</button>
+              <button type="button" id="replay">Replay</button>
+              <button type="button" id="play" aria-pressed="false">Play</button>
+              <button type="button" id="next" class="is-primary">Next</button>
+            </div>
+            <p class="control-hint">Arrow keys move between steps while a control in this lesson is focused.</p>
+            <ol class="stepper" id="stepper" aria-label="Steps"></ol>
+          </div>
+        </div>
+
+        <section class="takeaways" id="takeaways" aria-labelledby="takeaways-title">
+          <h2 id="takeaways-title">Takeaways</h2>
+          <ul>
+          <li>TLS 1.3 hides bytes, detects changes, and authenticates the server. TCP did none of those.</li>
+          <li>Key shares create a shared secret that is never sent. The certificate and CertificateVerify come after, already encrypted.</li>
+          <li>SNI usually still reveals the site name. TLS 1.2 diagrams that show a cleartext certificate are teaching the older handshake.</li>
+          </ul>
+        </section>
+        <section class="quiz" id="quiz" aria-labelledby="quiz-title">
+          <h2 id="quiz-title" tabindex="-1">Check yourself</h2>
+        <fieldset data-answer="after" data-why="Messages after ServerHello are encrypted with the handshake keys. A cleartext certificate is the TLS 1.2 picture.">
+          <legend>In TLS 1.3, when does the server send its certificate?</legend>
+            <label><input type="radio" name="tls-q1" value="clear"> In the clear, before any keys exist</label>
+            <label><input type="radio" name="tls-q1" value="after"> After the key shares, encrypted under the handshake keys</label>
+            <label><input type="radio" name="tls-q1" value="click"> Only after the user clicks the lock icon</label>
+        </fieldset>
+        <fieldset data-answer="dh" data-why="Each side combines its private key share with the peer's public key share. The secret is not sent, and it is not a hash of the URL.">
+          <legend>What produces the shared secret in a typical TLS 1.3 handshake?</legend>
+            <label><input type="radio" name="tls-q2" value="password"> The server encrypts a session key with the user's password</label>
+            <label><input type="radio" name="tls-q2" value="dh"> Ephemeral Diffie-Hellman from the two key shares</label>
+            <label><input type="radio" name="tls-q2" value="hash"> SHA-256 of the URL</label>
+        </fieldset>
+        <fieldset data-answer="transcript" data-why="Finished is a MAC over the handshake. Both sides must have seen the same messages and derived the same keys.">
+          <legend>What does Finished check?</legend>
+            <label><input type="radio" name="tls-q3" value="transcript"> That both sides saw the same handshake and hold the same keys</label>
+            <label><input type="radio" name="tls-q3" value="ttl"> That the DNS TTL has not expired</label>
+            <label><input type="radio" name="tls-q3" value="images"> That the page contains no images</label>
+        </fieldset>
+          <button type="button" class="btn btn-primary" data-quiz>Check answers</button>
+          <p class="quiz-result" role="status"></p>
+        </section>
+        <p class="sources">Sources: <a href="https://www.rfc-editor.org/rfc/rfc8446" target="_blank" rel="noopener noreferrer">RFC 8446</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/Security/Transport_Layer_Security" target="_blank" rel="noopener noreferrer">MDN: TLS</a> · <a href="https://www.rfc-editor.org/rfc/rfc6066" target="_blank" rel="noopener noreferrer">RFC 6066</a>. Pictures use small stand-in numbers so the steps are easy to see. They are teaching models, not a packet capture.</p>
+        <nav class="pager" aria-label="More lessons">
+          <a href="tcp.html">Previous · How TCP carries a conversation</a>
+          <a href="certificates.html">Next · How a certificate earns trust</a>
+        </nav>
+      </article>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© 2026 Yash Tapadiya · <a href="../">Portfolio</a> · Learn with Me</p>
+    </div>
+  </footer>
+  <script src="js/learn.js"></script>
+</body>
+</html>

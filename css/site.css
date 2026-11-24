@@ -285,6 +285,7 @@ html.has-cursor * { cursor: none !important; }
   font: inherit;
   font-weight: 650;
   padding: 0 0.9rem;
+  white-space: nowrap;
 }
 
 .theme-toggle:hover,
@@ -292,7 +293,15 @@ html.has-cursor * { cursor: none !important; }
 
 .nav-toggle { display: none; }
 
-.nav-hire { padding-inline: 1rem; }
+.nav-hire { padding-inline: 1rem; white-space: nowrap; }
+
+@media (max-width: 520px) {
+  .nav-actions { gap: 0.35rem; }
+  .nav-hire { display: none; }
+  .theme-toggle,
+  .nav-toggle { padding-inline: 0.7rem; }
+  .logo { font-size: 1.02rem; }
+}
 
 .scroll-progress {
   position: absolute;
@@ -941,6 +950,48 @@ html[data-theme="light"] .hero-portrait img {
   .contact-list { grid-template-columns: 1fr; }
   .section { padding: 4.2rem 0; }
   .skills-reel { display: none !important; }
+}
+
+.learn-tease { border-top: 1px solid var(--line); }
+
+.learn-tease-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: start;
+}
+
+.learn-tease p { max-width: 36rem; }
+
+.learn-tease .btn { margin-top: 1.25rem; }
+
+.learn-tease-list a {
+  display: grid;
+  grid-template-columns: 1.6rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: baseline;
+  text-decoration: none;
+  padding: 0.85rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.learn-tease-list li:last-child a { border-bottom: 1px solid var(--line); }
+
+.learn-tease-list span {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 1.25rem;
+  letter-spacing: -0.03em;
+}
+
+.learn-tease-list a:hover { color: var(--brass); }
+
+@media (max-width: 1180px) and (min-width: 861px) {
+  .nav-links { gap: 0.7rem; }
+  .logo { font-size: 1.05rem; }
+}
+
+@media (max-width: 860px) {
+  .learn-tease-grid { grid-template-columns: 1fr; }
 }
 
 @media (forced-colors: active) {

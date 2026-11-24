@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" class="no-js" data-lesson="hashing">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    document.documentElement.classList.remove("no-js");
+    try {
+      var savedTheme = localStorage.getItem("yt-theme");
+      if (savedTheme === "light" || savedTheme === "dark") {
+        document.documentElement.setAttribute("data-theme", savedTheme);
+      }
+    } catch (err) {}
+  </script>
+  <title>What a hash actually promises — Learn with Me</title>
+  <meta name="description" content="See what SHA-256 guarantees, watch the avalanche effect with a real digest, and why password storage needs a salt and a slow hash.">
+  <meta name="author" content="Yash Tapadiya">
+  <meta name="theme-color" content="#0f1815">
+  <link rel="canonical" href="https://yashtap1245-tech.github.io/learn/hashing.html">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:site_name" content="Yash Tapadiya">
+  <meta property="og:title" content="What a hash actually promises — Learn with Me">
+  <meta property="og:description" content="See what SHA-256 guarantees, watch the avalanche effect with a real digest, and why password storage needs a salt and a slow hash.">
+  <meta property="og:url" content="https://yashtap1245-tech.github.io/learn/hashing.html">
+  <meta property="og:image" content="https://yashtap1245-tech.github.io/data/portrait.jpg">
+  <meta property="og:image:alt" content="Portrait of Yash Tapadiya">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="What a hash actually promises — Learn with Me">
+  <meta name="twitter:description" content="See what SHA-256 guarantees, watch the avalanche effect with a real digest, and why password storage needs a salt and a slow hash.">
+  <meta name="twitter:image" content="https://yashtap1245-tech.github.io/data/portrait.jpg">
+  <link rel="preload" href="../fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../fonts/source-sans-3.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../css/site.css">
+  <link rel="stylesheet" href="css/learn.css">
+  
+  <script type="application/ld+json">
+  {
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "What a hash actually promises",
+  "description": "See what SHA-256 guarantees, watch the avalanche effect with a real digest, and why password storage needs a salt and a slow hash.",
+  "url": "https://yashtap1245-tech.github.io/learn/hashing.html",
+  "isAccessibleForFree": true,
+  "inLanguage": "en",
+  "learningResourceType": "lesson",
+  "teaches": "Cryptographic hashing, the avalanche effect, and password salts",
+  "author": {
+    "@type": "Person",
+    "name": "Yash Tapadiya",
+    "url": "https://yashtap1245-tech.github.io/"
+  }
+}
+  </script>
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="site-header" id="site-header">
+    <a class="logo" href="../">Yash Tapadiya</a>
+    <nav class="site-nav" id="site-nav" aria-label="Sections">
+      <ul class="nav-links">
+        <li><a href="../#about">About</a></li>
+        <li><a href="../#skills">Skills</a></li>
+        <li><a href="../#experience">Experience</a></li>
+        <li><a href="../#projects">Projects</a></li>
+        <li><a href="index.html" aria-current="page">Learn with Me</a></li>
+        <li><a href="../#contact">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false" aria-label="Switch to light mode">
+        <span class="theme-toggle-label">Light</span>
+      </button>
+      <a class="btn btn-primary nav-hire" href="mailto:yashtap1245@gmail.com">Contact Me</a>
+      <button type="button" class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    </div>
+    <div class="scroll-progress" aria-hidden="true"><span id="scroll-progress"></span></div>
+  </header>
+  <main id="content" tabindex="-1">
+    <div class="learn-layout">
+      <nav class="course-nav" aria-label="Lessons">
+        <p>Lessons</p>
+        <ol>
+          <li><a href="dns.html">URL lookup</a></li>
+          <li><a href="tcp.html">TCP</a></li>
+          <li><a href="tls.html">TLS</a></li>
+          <li><a href="certificates.html">Certificates</a></li>
+          <li><a href="hashing.html" aria-current="page">Hashing</a></li>
+          <li><a href="encryption.html">Encryption</a></li>
+        </ol>
+      </nav>
+      <article>
+        <header class="lesson-intro">
+          <p class="lesson-kicker">Lesson 5 of 6</p>
+          <h1>What a hash actually promises</h1>
+          <p class="lede">Certificates and TLS keep using a hash. A cryptographic hash is a fingerprint of some bytes. It is not a lock, and by itself it is not a way to store a password.</p>
+          <ul class="learn-points">
+          <li>What SHA-256 promises, and why you cannot decrypt a hash</li>
+          <li>The avalanche effect, computed in your browser</li>
+          <li>Why a password hash needs a unique salt and a slow function</li>
+          </ul>
+        </header>
+        <div class="stage">
+          <div class="diagram-panel">
+            <div id="diagram" aria-hidden="true"></div>
+            <p id="diagram-caption" class="diagram-caption"></p>
+          </div>
+          <div class="step-column">
+            <div id="step-live">
+              <p id="step-count" class="step-count" aria-live="polite"></p>
+              <div id="steps">
+          <section class="step is-current" data-frame="fingerprint">
+            <h2>A fingerprint, not a lock</h2>
+            <p>SHA-256 takes any bytes and returns 256 bits. The same input always produces the same digest. There is no key, and there is no reverse step. You do not decrypt a hash. You recompute it and compare.</p>
+            <p>TLS uses hashes inside key derivation and inside signatures. A certificate signature covers a hash of the certificate. It is not a second, hidden copy of the certificate.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> A hash is a fingerprint you can recompute. It has no key to unlock.</p>
+          </section>
+          <section class="step" data-frame="length">
+            <h2>Any length in, 256 bits out</h2>
+            <p>A short name and a disk image both become 32 bytes under SHA-256. That fixed size is why hashes can name large objects. It is also why a hash is not a compressed copy. Information is discarded on purpose, so many inputs could in theory share a digest.</p>
+            <p>SHA-256 is specified in FIPS 180-4. The digest is 64 hexadecimal characters. SHA-1 is retired for signatures because collisions were found. A cryptographic hash is built so that finding two inputs with the same digest is not practical.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> The output length never grows with the input. Collision resistance is what makes that usable.</p>
+          </section>
+          <section class="step" data-frame="avalanche" data-open-lab="lab-hash">
+            <h2>One character should scramble the digest</h2>
+            <p>Change one character and about half of the output bits should flip, with no pattern you can follow back to the edit. That is the avalanche effect. You cannot nudge a hash toward a target by tweaking the input.</p>
+            <p>The demo under the controls computes real SHA-256 with Web Crypto, in this browser. Nothing is sent to a server. Edit either line. Differing hex digits are marked, and the bit count is measured, not guessed.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> A tiny input change produces a digest that looks unrelated. You can measure that here.</p>
+          </section>
+          <section class="step" data-frame="properties">
+            <h2>Three things a cryptographic hash resists</h2>
+            <p>Preimage resistance: given only a digest, finding an input that produces it is infeasible. Second-preimage resistance: given an input, finding a different input with the same digest is infeasible. Collision resistance: finding any two different inputs with the same digest is infeasible, even if you chose both.</p>
+            <p>These are statements about cost, not a claim that no second input exists. The output is 256 bits long, so collisions exist in theory. Nobody has a practical way to find a SHA-256 collision.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> The three resistances are: can't find the input, can't find a twin, can't find any colliding pair.</p>
+          </section>
+          <section class="step" data-frame="passwords" data-open-lab="lab-password">
+            <h2>Passwords need a salt and a slow hash</h2>
+            <p>People reuse short passwords. SHA-256 is fast on purpose, so a fast hash lets an attacker try an enormous number of guesses. Equal passwords also produce equal digests, which is why a precomputed table works against them.</p>
+            <p>A salt is a unique random value stored next to each password hash. It is not a secret. It makes each input unique, so one table cannot be reused across users. The function should also be slow. Argon2 is the current first choice for new systems (RFC 9106). scrypt and bcrypt are in wide use. PBKDF2 is an older slowdown that Web Crypto can run here, at 100,000 iterations so the page stays responsive. That count is for the demo. It is not a production setting, and Argon2 is the stronger default.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> Store passwords with a unique salt and a slow password hash. Do not store them with plain SHA-256.</p>
+          </section>
+          <section class="step" data-frame="recap">
+            <h2>A fingerprint with sharp edges</h2>
+            <p>SHA-256 is deterministic, fixed length, and sensitive to small changes. It resists finding an input, a twin, or any collision. Password storage adds a salt and a function that is expensive to compute.</p>
+            <p>None of that hides a message behind a key. Encryption can be reversed by someone who should reverse it. That is the last lesson.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> Hashing fingerprints. Password hashing slows guessing. Encryption is a different tool.</p>
+          </section>
+              </div>
+            </div>
+            <div class="controls">
+              <button type="button" id="prev">Previous</button>
+              <button type="button" id="replay">Replay</button>
+              <button type="button" id="play" aria-pressed="false">Play</button>
+              <button type="button" id="next" class="is-primary">Next</button>
+            </div>
+            <p class="control-hint">Arrow keys move between steps while a control in this lesson is focused.</p>
+            <ol class="stepper" id="stepper" aria-label="Steps"></ol>
+          </div>
+        </div>
+
+        <section class="lab" id="lab-hash" aria-labelledby="hash-title">
+          <h2 id="hash-title">A real SHA-256</h2>
+          <p>Both digests are computed in this browser with Web Crypto. Nothing is uploaded.</p>
+          <label for="hash-input">Text</label>
+          <input id="hash-input" type="text" value="connection" autocomplete="off" spellcheck="false">
+          <output id="hash-hex" class="hex"></output>
+          <label for="hash-flip">The same text, with one character changed</label>
+          <input id="hash-flip" type="text" value="connexction" autocomplete="off" spellcheck="false">
+          <output id="hash-hex-2" class="hex"></output>
+          <p id="hash-distance" class="distance" role="status"></p>
+        </section>
+        <section class="lab" id="lab-password" aria-labelledby="pw-title">
+          <h2 id="pw-title">Salt, then slow the hash down</h2>
+          <p>Use a throwaway word, not a real password. This field is plain text so the browser does not offer to save it. PBKDF2-HMAC-SHA-256 at 100,000 iterations shows a salt and a time cost. <a href="https://www.rfc-editor.org/rfc/rfc9106" target="_blank" rel="noopener noreferrer">Argon2</a> is the better choice for a new system. OWASP recommends a higher iteration count than this demo uses when PBKDF2 is the tool you have.</p>
+          <label for="pw">Throwaway word</label>
+          <input id="pw" type="text" autocomplete="off" spellcheck="false" placeholder="not a real password">
+          <div class="lab-actions">
+            <button type="button" class="btn btn-primary" id="pw-new">Hash with a new salt</button>
+            <button type="button" class="btn btn-ghost" id="pw-same">Repeat with the same salt</button>
+            <button type="button" class="btn btn-ghost" id="pw-fast">Compare with plain SHA-256</button>
+          </div>
+          <p id="pw-out" class="lab-out" role="status"></p>
+        </section>
+
+        <section class="takeaways" id="takeaways" aria-labelledby="takeaways-title">
+          <h2 id="takeaways-title">Takeaways</h2>
+          <ul>
+          <li>SHA-256 maps any input to 256 bits. The same input always matches. There is no key and no decryption.</li>
+          <li>A small change should flip about half the bits. The demo measures a real digest, including the empty-input self-check inside the page.</li>
+          <li>Password storage wants a unique salt and a slow hash such as Argon2. Plain SHA-256 is the wrong tool for that job.</li>
+          </ul>
+        </section>
+        <section class="quiz" id="quiz" aria-labelledby="quiz-title">
+          <h2 id="quiz-title" tabindex="-1">Check yourself</h2>
+        <fieldset data-answer="half" data-why="Avalanche means the digest looks unrelated. It does not change only at the end, and it does not stay put.">
+          <legend>What should a cryptographic hash show after one character changes?</legend>
+            <label><input type="radio" name="hash-q1" value="half"> The digest changes in about half its bits</label>
+            <label><input type="radio" name="hash-q1" value="tail"> Only the last four hex characters change</label>
+            <label><input type="radio" name="hash-q1" value="same"> Nothing, because hashes ignore small edits</label>
+        </fieldset>
+        <fieldset data-answer="fast" data-why="SHA-256 is fast, so guessing is cheap, and identical passwords share a digest unless a salt makes them unique. It is not decrypted with a private key.">
+          <legend>Why is plain SHA-256 a poor way to store a password?</legend>
+            <label><input type="radio" name="hash-q2" value="slow"> Because it is slow and already salted</label>
+            <label><input type="radio" name="hash-q2" value="fast"> Because it is fast, and equal passwords share a digest unless you salt them</label>
+            <label><input type="radio" name="hash-q2" value="decrypt"> Because it can be decrypted with the server's private key</label>
+        </fieldset>
+        <fieldset data-answer="unique" data-why="A salt is unique per password and stored with the hash. It is not secret, and it is not derived by reversing the password.">
+          <legend>What is a salt?</legend>
+            <label><input type="radio" name="hash-q3" value="unique"> A unique value stored with the hash. It is not a secret</label>
+            <label><input type="radio" name="hash-q3" value="shared"> One secret value reused for every user and kept only in memory</label>
+            <label><input type="radio" name="hash-q3" value="reverse"> The password spelled backward</label>
+        </fieldset>
+          <button type="button" class="btn btn-primary" data-quiz>Check answers</button>
+          <p class="quiz-result" role="status"></p>
+        </section>
+        <p class="sources">Sources: <a href="https://csrc.nist.gov/pubs/fips/180-4/upd1/final" target="_blank" rel="noopener noreferrer">FIPS 180-4</a> · <a href="https://www.rfc-editor.org/rfc/rfc9106" target="_blank" rel="noopener noreferrer">RFC 9106</a> · <a href="https://www.rfc-editor.org/rfc/rfc8018" target="_blank" rel="noopener noreferrer">RFC 8018</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest" target="_blank" rel="noopener noreferrer">MDN: SubtleCrypto.digest</a>. Pictures use small stand-in numbers so the steps are easy to see. They are teaching models, not a packet capture.</p>
+        <nav class="pager" aria-label="More lessons">
+          <a href="certificates.html">Previous · How a certificate earns trust</a>
+          <a href="encryption.html">Next · Hiding data, and proving who sent it</a>
+        </nav>
+      </article>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© 2026 Yash Tapadiya · <a href="../">Portfolio</a> · Learn with Me</p>
+    </div>
+  </footer>
+  <script src="js/learn.js"></script>
+</body>
+</html>

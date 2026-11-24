@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" class="no-js" data-lesson="encryption">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    document.documentElement.classList.remove("no-js");
+    try {
+      var savedTheme = localStorage.getItem("yt-theme");
+      if (savedTheme === "light" || savedTheme === "dark") {
+        document.documentElement.setAttribute("data-theme", savedTheme);
+      }
+    } catch (err) {}
+  </script>
+  <title>Hiding data, and proving who sent it — Learn with Me</title>
+  <meta name="description" content="Compare symmetric AES-GCM with public-key pairs, try Diffie-Hellman and ECDSA in the browser, and see how TLS 1.3 combines them.">
+  <meta name="author" content="Yash Tapadiya">
+  <meta name="theme-color" content="#0f1815">
+  <link rel="canonical" href="https://yashtap1245-tech.github.io/learn/encryption.html">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:site_name" content="Yash Tapadiya">
+  <meta property="og:title" content="Hiding data, and proving who sent it — Learn with Me">
+  <meta property="og:description" content="Compare symmetric AES-GCM with public-key pairs, try Diffie-Hellman and ECDSA in the browser, and see how TLS 1.3 combines them.">
+  <meta property="og:url" content="https://yashtap1245-tech.github.io/learn/encryption.html">
+  <meta property="og:image" content="https://yashtap1245-tech.github.io/data/portrait.jpg">
+  <meta property="og:image:alt" content="Portrait of Yash Tapadiya">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Hiding data, and proving who sent it — Learn with Me">
+  <meta name="twitter:description" content="Compare symmetric AES-GCM with public-key pairs, try Diffie-Hellman and ECDSA in the browser, and see how TLS 1.3 combines them.">
+  <meta name="twitter:image" content="https://yashtap1245-tech.github.io/data/portrait.jpg">
+  <link rel="preload" href="../fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../fonts/source-sans-3.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../css/site.css">
+  <link rel="stylesheet" href="css/learn.css">
+  
+  <script type="application/ld+json">
+  {
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "Hiding data, and proving who sent it",
+  "description": "Compare symmetric AES-GCM with public-key pairs, try Diffie-Hellman and ECDSA in the browser, and see how TLS 1.3 combines them.",
+  "url": "https://yashtap1245-tech.github.io/learn/encryption.html",
+  "isAccessibleForFree": true,
+  "inLanguage": "en",
+  "learningResourceType": "lesson",
+  "teaches": "Symmetric encryption, Diffie-Hellman, and digital signatures",
+  "author": {
+    "@type": "Person",
+    "name": "Yash Tapadiya",
+    "url": "https://yashtap1245-tech.github.io/"
+  }
+}
+  </script>
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="site-header" id="site-header">
+    <a class="logo" href="../">Yash Tapadiya</a>
+    <nav class="site-nav" id="site-nav" aria-label="Sections">
+      <ul class="nav-links">
+        <li><a href="../#about">About</a></li>
+        <li><a href="../#skills">Skills</a></li>
+        <li><a href="../#experience">Experience</a></li>
+        <li><a href="../#projects">Projects</a></li>
+        <li><a href="index.html" aria-current="page">Learn with Me</a></li>
+        <li><a href="../#contact">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false" aria-label="Switch to light mode">
+        <span class="theme-toggle-label">Light</span>
+      </button>
+      <a class="btn btn-primary nav-hire" href="mailto:yashtap1245@gmail.com">Contact Me</a>
+      <button type="button" class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    </div>
+    <div class="scroll-progress" aria-hidden="true"><span id="scroll-progress"></span></div>
+  </header>
+  <main id="content" tabindex="-1">
+    <div class="learn-layout">
+      <nav class="course-nav" aria-label="Lessons">
+        <p>Lessons</p>
+        <ol>
+          <li><a href="dns.html">URL lookup</a></li>
+          <li><a href="tcp.html">TCP</a></li>
+          <li><a href="tls.html">TLS</a></li>
+          <li><a href="certificates.html">Certificates</a></li>
+          <li><a href="hashing.html">Hashing</a></li>
+          <li><a href="encryption.html" aria-current="page">Encryption</a></li>
+        </ol>
+      </nav>
+      <article>
+        <header class="lesson-intro">
+          <p class="lesson-kicker">Lesson 6 of 6</p>
+          <h1>Hiding data, and proving who sent it</h1>
+          <p class="lede">A hash cannot be unlocked. Encryption can, by someone with the right key. A signature does not hide the message. It lets anyone with the public key check that the private key was used on these exact bytes.</p>
+          <ul class="learn-points">
+          <li>AES-GCM, including what a flipped ciphertext byte does</li>
+          <li>A Diffie-Hellman secret that is never transmitted</li>
+          <li>A signature that verifies, then fails when the message changes</li>
+          </ul>
+        </header>
+        <div class="stage">
+          <div class="diagram-panel">
+            <div id="diagram" aria-hidden="true"></div>
+            <p id="diagram-caption" class="diagram-caption"></p>
+          </div>
+          <div class="step-column">
+            <div id="step-live">
+              <p id="step-count" class="step-count" aria-live="polite"></p>
+              <div id="steps">
+          <section class="step is-current" data-frame="jobs">
+            <h2>Two jobs</h2>
+            <p>Hiding and proving are different jobs. Encryption hides bytes so a key holder can read them. A signature leaves the message readable and lets other people check that a specific private key produced a tag over this exact message.</p>
+            <p>TLS uses both. Ephemeral Diffie-Hellman agrees on a secret. AES-GCM hides the HTTP bytes and detects changes. The certificate signature proves the server holds the certified private key.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> Encryption hides. Signatures prove. A protocol that needs both uses both.</p>
+          </section>
+          <section class="step" data-frame="symmetric">
+            <h2>One shared key</h2>
+            <p>Symmetric encryption uses the same key to encrypt and to decrypt. AES is the standard block cipher. AES-GCM is an authenticated mode: it encrypts, and it attaches a tag. If the ciphertext or the tag changes, decryption fails closed and returns no plaintext.</p>
+            <p>The hard operational rule is the nonce. GCM wants a 96-bit nonce, and that nonce must not be reused with the same key. NIST SP 800-38D is the specification for GCM. The demo generates a new nonce every time you encrypt.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> One shared key locks and unlocks. The nonce must be unique for that key, and the tag detects tampering.</p>
+          </section>
+          <section class="step" data-frame="aes" data-open-lab="lab-aes">
+            <h2>Watch AES-GCM refuse a flipped byte</h2>
+            <p>The panel below generates an AES-256-GCM key in this page and keeps it here. Encrypt a line, decrypt it, then flip one ciphertext byte and decrypt again.</p>
+            <p>The second decryption does not return a slightly wrong message. Web Crypto rejects the operation. That is the integrity half of an AEAD cipher, the same family TLS 1.3 uses for application data.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> With an AEAD cipher, a changed byte means no plaintext at all.</p>
+          </section>
+          <section class="step" data-frame="pair">
+            <h2>A public key and a private key</h2>
+            <p>Asymmetric keys are generated as a pair. The public key can be shared. The private key stays with its owner. You do not derive the private key from the public key in practice.</p>
+            <p>RSA uses large integers. Elliptic-curve keys, such as P-256 and X25519, are shorter at comparable strength, and TLS 1.3 key shares are elliptic-curve Diffie-Hellman. The pair is used in two directions, and mixing them up is a common mistake. Encrypt to a public key and decrypt with the private key. Sign with the private key and verify with the public key.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> The public key is for other people. The private key stays with its owner.</p>
+          </section>
+          <section class="step" data-frame="agree" data-open-lab="lab-ecdh">
+            <h2>Agree on a secret without sending it</h2>
+            <p>TLS 1.3 does not encrypt the session key to the server's long-term RSA key. That was RSA key transport in TLS 1.2, and it was removed. Each side sends a public key share. Each combines its own private share with the other's public share and arrives at the same secret.</p>
+            <p>The demo uses P-256, which Web Crypto supports broadly. TLS often uses X25519. The shape is the same: public keys cross the network, private keys do not, and a listener who saved both public keys still does not have the secret.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> Diffie-Hellman exchanges public keys and ends with a shared secret. The secret itself is not transmitted.</p>
+          </section>
+          <section class="step" data-frame="sign" data-open-lab="lab-sign">
+            <h2>Sign with the private key</h2>
+            <p>A signature is produced with the private key over a hash of the message. This demo uses ECDSA with P-256 and SHA-256, the same shape as many certificate signatures. Anyone with the public key can verify. The signature does not reveal the private key.</p>
+            <p>ECDSA includes a random value, so signing the same sentence twice yields two different signatures, and both still verify. Change one character of the message and verification fails. The message sits beside the signature in the clear. This is not encryption.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> Verification uses the public key. A changed message, or the wrong key, does not verify.</p>
+          </section>
+          <section class="step" data-frame="hybrid">
+            <h2>How TLS combines them</h2>
+            <p>Bulk data uses the fast symmetric cipher. The handshake uses Diffie-Hellman so that cipher's key is never sent, and a signature to tie the handshake to the certified private key. Hashing sits inside the signature, inside Finished, and inside HKDF.</p>
+            <p>RSA encryption of a small secret still exists in other systems, as RSA-OAEP. It is not how TLS 1.3 moves the session key. A diagram that shows the server's long-term public key encrypting that key is teaching the older handshake.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> TLS 1.3 is hybrid: Diffie-Hellman for the secret, a signature for identity, AES-GCM for the bytes.</p>
+          </section>
+          <section class="step" data-frame="recap">
+            <h2>One job each</h2>
+            <p>A name becomes an address. TCP opens a reliable stream. TLS 1.3 agrees on keys and checks a certificate. The certificate is a chain of signatures back to a local root. Hashes fingerprint the signed bytes. AES-GCM carries the page.</p>
+            <p>Each piece is checkable on its own, and none of them stands in for the others. That is the whole path from the address bar to a private page.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> The connection is a stack of specific jobs: name, deliver, agree, authenticate, hide.</p>
+          </section>
+              </div>
+            </div>
+            <div class="controls">
+              <button type="button" id="prev">Previous</button>
+              <button type="button" id="replay">Replay</button>
+              <button type="button" id="play" aria-pressed="false">Play</button>
+              <button type="button" id="next" class="is-primary">Next</button>
+            </div>
+            <p class="control-hint">Arrow keys move between steps while a control in this lesson is focused.</p>
+            <ol class="stepper" id="stepper" aria-label="Steps"></ol>
+          </div>
+        </div>
+
+        <section class="lab" id="lab-aes" aria-labelledby="aes-title">
+          <h2 id="aes-title">Encrypt and decrypt with AES-GCM</h2>
+          <p>The key is generated in this page and stays here. Each encryption uses a fresh 96-bit nonce. Flipping one ciphertext byte should make decryption return nothing.</p>
+          <label for="aes-plain">Message</label>
+          <textarea id="aes-plain">GET /docs</textarea>
+          <div class="lab-actions">
+            <button type="button" class="btn btn-primary" id="aes-encrypt">Encrypt</button>
+            <button type="button" class="btn btn-ghost" id="aes-decrypt">Decrypt</button>
+            <button type="button" class="btn btn-ghost" id="aes-flip">Flip one ciphertext byte</button>
+          </div>
+          <p id="aes-out" class="lab-out" role="status"></p>
+        </section>
+        <section class="lab" id="lab-ecdh" aria-labelledby="ecdh-title">
+          <h2 id="ecdh-title">Agree on a secret with ECDH</h2>
+          <p>Alice and Bob each generate a P-256 key pair. Only the public keys are shown. TLS 1.3 often uses X25519 for this step. P-256 is the same Diffie-Hellman shape, and Web Crypto can run it here.</p>
+          <div class="lab-actions">
+            <button type="button" class="btn btn-primary" id="ecdh-run">Derive a shared secret</button>
+          </div>
+          <p id="ecdh-out" class="lab-out" role="status"></p>
+        </section>
+        <section class="lab" id="lab-sign" aria-labelledby="sign-title">
+          <h2 id="sign-title">Sign, then change one character</h2>
+          <p>ECDSA P-256 signs a SHA-256 hash of the message. The message itself is not hidden. Signing the same words again produces a different signature, because ECDSA uses a random component, and both signatures still verify.</p>
+          <label for="sign-msg">Message</label>
+          <textarea id="sign-msg">example.com</textarea>
+          <div class="lab-actions">
+            <button type="button" class="btn btn-primary" id="sign-run">Sign</button>
+            <button type="button" class="btn btn-ghost" id="sign-verify">Verify</button>
+            <button type="button" class="btn btn-ghost" id="sign-tamper">Add an exclamation mark</button>
+          </div>
+          <p id="sign-out" class="lab-out" role="status"></p>
+        </section>
+
+        <section class="takeaways" id="takeaways" aria-labelledby="takeaways-title">
+          <h2 id="takeaways-title">Takeaways</h2>
+          <ul>
+          <li>AES-GCM uses one shared key and a unique nonce. A bad tag means the browser returns no plaintext.</li>
+          <li>Diffie-Hellman sends public keys and finishes with a shared secret that never traveled. TLS 1.3 uses that pattern.</li>
+          <li>A signature is checked with the public key and does not hide the message. Change the message and the check fails.</li>
+          </ul>
+        </section>
+        <section class="quiz" id="quiz" aria-labelledby="quiz-title">
+          <h2 id="quiz-title" tabindex="-1">Check yourself</h2>
+        <fieldset data-answer="tag" data-why="The authentication tag no longer matches, so an AEAD cipher returns no plaintext. The cipher is doing the check it was built to do.">
+          <legend>AES-GCM refuses to decrypt after one flipped ciphertext byte. What does that show?</legend>
+            <label><input type="radio" name="enc-q1" value="broken"> The cipher is broken</label>
+            <label><input type="radio" name="enc-q1" value="tag"> The authentication tag no longer matches, so no plaintext is returned</label>
+            <label><input type="radio" name="enc-q1" value="expired"> The public key has expired</label>
+        </fieldset>
+        <fieldset data-answer="public" data-why="Each side sends its public key. The private keys stay put, and the shared secret is computed locally.">
+          <legend>In the ECDH demo, what crosses to the other party?</legend>
+            <label><input type="radio" name="enc-q2" value="private"> The private key</label>
+            <label><input type="radio" name="enc-q2" value="public"> The public key</label>
+            <label><input type="radio" name="enc-q2" value="wrapped"> The private key, encrypted with AES</label>
+        </fieldset>
+        <fieldset data-answer="public" data-why="The signer used the private key. Everyone else uses the matching public key. A shared AES key is a different tool.">
+          <legend>Which key checks a digital signature?</legend>
+            <label><input type="radio" name="enc-q3" value="public"> The signer's public key</label>
+            <label><input type="radio" name="enc-q3" value="private"> The signer's private key</label>
+            <label><input type="radio" name="enc-q3" value="aes"> A shared AES key</label>
+        </fieldset>
+          <button type="button" class="btn btn-primary" data-quiz>Check answers</button>
+          <p class="quiz-result" role="status"></p>
+        </section>
+        <p class="sources">Sources: <a href="https://csrc.nist.gov/pubs/sp/800/38/d/final" target="_blank" rel="noopener noreferrer">NIST SP 800-38D</a> · <a href="https://www.rfc-editor.org/rfc/rfc8446" target="_blank" rel="noopener noreferrer">RFC 8446</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/encrypt" target="_blank" rel="noopener noreferrer">MDN: SubtleCrypto.encrypt</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/sign" target="_blank" rel="noopener noreferrer">MDN: SubtleCrypto.sign</a>. Pictures use small stand-in numbers so the steps are easy to see. They are teaching models, not a packet capture.</p>
+        <nav class="pager" aria-label="More lessons">
+          <a href="hashing.html">Previous · What a hash actually promises</a>
+          <span></span>
+        </nav>
+      </article>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© 2026 Yash Tapadiya · <a href="../">Portfolio</a> · Learn with Me</p>
+    </div>
+  </footer>
+  <script src="js/learn.js"></script>
+</body>
+</html>

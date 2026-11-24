@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" class="no-js" data-lesson="dns">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    document.documentElement.classList.remove("no-js");
+    try {
+      var savedTheme = localStorage.getItem("yt-theme");
+      if (savedTheme === "light" || savedTheme === "dark") {
+        document.documentElement.setAttribute("data-theme", savedTheme);
+      }
+    } catch (err) {}
+  </script>
+  <title>What happens when you type a URL — Learn with Me</title>
+  <meta name="description" content="Follow a browser from the address bar through caches, a recursive resolver, the root, a top-level domain, and the authoritative DNS server that returns an IP address.">
+  <meta name="author" content="Yash Tapadiya">
+  <meta name="theme-color" content="#0f1815">
+  <link rel="canonical" href="https://yashtap1245-tech.github.io/learn/dns.html">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:site_name" content="Yash Tapadiya">
+  <meta property="og:title" content="What happens when you type a URL — Learn with Me">
+  <meta property="og:description" content="Follow a browser from the address bar through caches, a recursive resolver, the root, a top-level domain, and the authoritative DNS server that returns an IP address.">
+  <meta property="og:url" content="https://yashtap1245-tech.github.io/learn/dns.html">
+  <meta property="og:image" content="https://yashtap1245-tech.github.io/data/portrait.jpg">
+  <meta property="og:image:alt" content="Portrait of Yash Tapadiya">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="What happens when you type a URL — Learn with Me">
+  <meta name="twitter:description" content="Follow a browser from the address bar through caches, a recursive resolver, the root, a top-level domain, and the authoritative DNS server that returns an IP address.">
+  <meta name="twitter:image" content="https://yashtap1245-tech.github.io/data/portrait.jpg">
+  <link rel="preload" href="../fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../fonts/source-sans-3.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../css/site.css">
+  <link rel="stylesheet" href="css/learn.css">
+  
+  <script type="application/ld+json">
+  {
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "What happens when you type a URL",
+  "description": "Follow a browser from the address bar through caches, a recursive resolver, the root, a top-level domain, and the authoritative DNS server that returns an IP address.",
+  "url": "https://yashtap1245-tech.github.io/learn/dns.html",
+  "isAccessibleForFree": true,
+  "inLanguage": "en",
+  "learningResourceType": "lesson",
+  "teaches": "DNS resolution from the address bar to an IP address",
+  "author": {
+    "@type": "Person",
+    "name": "Yash Tapadiya",
+    "url": "https://yashtap1245-tech.github.io/"
+  }
+}
+  </script>
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="site-header" id="site-header">
+    <a class="logo" href="../">Yash Tapadiya</a>
+    <nav class="site-nav" id="site-nav" aria-label="Sections">
+      <ul class="nav-links">
+        <li><a href="../#about">About</a></li>
+        <li><a href="../#skills">Skills</a></li>
+        <li><a href="../#experience">Experience</a></li>
+        <li><a href="../#projects">Projects</a></li>
+        <li><a href="index.html" aria-current="page">Learn with Me</a></li>
+        <li><a href="../#contact">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false" aria-label="Switch to light mode">
+        <span class="theme-toggle-label">Light</span>
+      </button>
+      <a class="btn btn-primary nav-hire" href="mailto:yashtap1245@gmail.com">Contact Me</a>
+      <button type="button" class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    </div>
+    <div class="scroll-progress" aria-hidden="true"><span id="scroll-progress"></span></div>
+  </header>
+  <main id="content" tabindex="-1">
+    <div class="learn-layout">
+      <nav class="course-nav" aria-label="Lessons">
+        <p>Lessons</p>
+        <ol>
+          <li><a href="dns.html" aria-current="page">URL lookup</a></li>
+          <li><a href="tcp.html">TCP</a></li>
+          <li><a href="tls.html">TLS</a></li>
+          <li><a href="certificates.html">Certificates</a></li>
+          <li><a href="hashing.html">Hashing</a></li>
+          <li><a href="encryption.html">Encryption</a></li>
+        </ol>
+      </nav>
+      <article>
+        <header class="lesson-intro">
+          <p class="lesson-kicker">Lesson 1 of 6</p>
+          <h1>What happens when you type a URL</h1>
+          <p class="lede">You press Enter on <code>https://example.com/docs</code>. The browser has a name. The internet routes by number. DNS is the lookup that connects the two, and it does not fetch the page.</p>
+          <ul class="learn-points">
+          <li>How a URL splits into scheme, host, port, and path</li>
+          <li>Why caches and the TTL stop a lookup from running every time</li>
+          <li>How a resolver walks root, top-level domain, and authoritative server</li>
+          </ul>
+        </header>
+        <div class="stage">
+          <div class="diagram-panel">
+            <div id="diagram" aria-hidden="true"></div>
+            <p id="diagram-caption" class="diagram-caption"></p>
+          </div>
+          <div class="step-column">
+            <div id="step-live">
+              <p id="step-count" class="step-count" aria-live="polite"></p>
+              <div id="steps">
+          <section class="step is-current" data-frame="parse">
+            <h2>A name, not a number</h2>
+            <p>You type <code>https://example.com/docs</code> and press Enter. The browser splits that string before it talks to anyone. The scheme is <code>https</code>. The host is <code>example.com</code>. The path is <code>/docs</code>. No port is written, and the scheme is HTTPS, so the port is 443.</p>
+            <p>Machines on the internet forward packets by IP address. The host is a name for people. The next job is to find an address for it.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> The address bar is for people. Routing uses numbers.</p>
+          </section>
+          <section class="step" data-frame="cache">
+            <h2>Look nearby first</h2>
+            <p>The browser checks its own DNS cache. A fresh answer for <code>example.com</code> ends the lookup. On a miss, the operating system checks its cache and the hosts file, a local list of names written by hand.</p>
+            <p>A cached answer stays fresh only for its TTL, a lifetime in seconds published with the record. When that lifetime is up, the answer is not reused.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> Many lookups never leave the machine. A cache hit is limited by the TTL.</p>
+          </section>
+          <section class="step" data-frame="resolver">
+            <h2>Hand the job to a resolver</h2>
+            <p>On a miss, a stub resolver on the computer sends one question to a recursive resolver. The network usually provides that resolver. Some people set a public one, such as <code>1.1.1.1</code> or <code>8.8.8.8</code>. A classic query is DNS on UDP port 53.</p>
+            <p>If the browser is configured for DNS over HTTPS, it asks a resolver itself, inside HTTPS, and may skip the operating system's resolver. Either way, the browser does not normally walk the hierarchy. It asks one resolver to do that walking.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> Your computer asks a resolver. The resolver does the searching.</p>
+          </section>
+          <section class="step" data-frame="root">
+            <h2>The root only knows the top-level domain</h2>
+            <p>The resolver starts at the root zone. Resolver software ships with a list of root servers, the root hints, so it knows where to send this first question.</p>
+            <p>A root server does not know the address of <code>example.com</code>. It knows who serves <code>.com</code>. The reply is a referral: name servers for <code>.com</code>, not the address you asked for.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> The root refers. It does not return the final address.</p>
+          </section>
+          <section class="step" data-frame="tld">
+            <h2>.com knows who owns the name</h2>
+            <p>The resolver asks a <code>.com</code> server. That server does not return the address either. It refers the resolver to the authoritative name servers for <code>example.com</code>, the ones the domain owner configured.</p>
+            <p>Each level of the name points at the next level. The packets go from the resolver to that level and back. The root does not call <code>.com</code> on your behalf.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> Each level refers the resolver onward. The resolver makes every query.</p>
+          </section>
+          <section class="step" data-frame="auth">
+            <h2>The authoritative server has the address</h2>
+            <p>The resolver asks a server that is authoritative for <code>example.com</code>. An <code>A</code> record is an IPv4 address. An <code>AAAA</code> record is an IPv6 address. Both can exist. The answer includes a TTL.</p>
+            <p>In this picture the addresses are <code>203.0.113.10</code> and <code>2001:db8::10</code>, and the TTL is 300 seconds. Those addresses are reserved for documentation by RFC 5737 and RFC 3849. They are not a live site. A real zone owner chooses the real records and the real TTL.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> Only the authoritative server answers with the address. The TTL says how long to remember it.</p>
+          </section>
+          <section class="step" data-frame="answer">
+            <h2>Back to the browser, then into a cache</h2>
+            <p>The resolver caches the answer for the TTL and returns it to the computer. The browser can open a connection to one of those addresses on port 443.</p>
+            <p>If both IPv6 and IPv4 come back, the browser may try them together and keep the one that connects first. That race is Happy Eyeballs, RFC 8305. If a UDP answer is too big, the server can set a truncation flag and the resolver retries over TCP. DNS is not UDP-only.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> The lookup is finished when the browser holds an address. The page has not been fetched.</p>
+          </section>
+          <section class="step" data-frame="recap">
+            <h2>A name became a number</h2>
+            <p>Parse the URL, check the caches, ask a recursive resolver, follow referrals from the root to <code>.com</code> to the authoritative server, and remember the answer for the TTL.</p>
+            <p>DNS answered where to connect. It did not load <code>/docs</code>, and it did not make the connection private. The next lesson is the reliable pipe to that address.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> DNS answers where. TCP is how the bytes get there.</p>
+          </section>
+              </div>
+            </div>
+            <div class="controls">
+              <button type="button" id="prev">Previous</button>
+              <button type="button" id="replay">Replay</button>
+              <button type="button" id="play" aria-pressed="false">Play</button>
+              <button type="button" id="next" class="is-primary">Next</button>
+            </div>
+            <p class="control-hint">Arrow keys move between steps while a control in this lesson is focused.</p>
+            <ol class="stepper" id="stepper" aria-label="Steps"></ol>
+          </div>
+        </div>
+
+        <section class="takeaways" id="takeaways" aria-labelledby="takeaways-title">
+          <h2 id="takeaways-title">Takeaways</h2>
+          <ul>
+          <li>The browser splits a URL, then looks for an IP address. DNS does not return the page.</li>
+          <li>Caches are limited by the TTL. A recursive resolver walks the hierarchy. The browser usually does not.</li>
+          <li>Root and top-level servers refer. The authoritative server returns A and AAAA records.</li>
+          </ul>
+        </section>
+        <section class="quiz" id="quiz" aria-labelledby="quiz-title">
+          <h2 id="quiz-title" tabindex="-1">Check yourself</h2>
+        <fieldset data-answer="ip" data-why="DNS returns records such as IP addresses. Fetching the page is a later connection.">
+          <legend>What does a successful DNS lookup give the browser?</legend>
+            <label><input type="radio" name="dns-q1" value="page"> The HTML of the page</label>
+            <label><input type="radio" name="dns-q1" value="ip"> An IP address it can connect to</label>
+            <label><input type="radio" name="dns-q1" value="key"> A TLS session key</label>
+        </fieldset>
+        <fieldset data-answer="resolver" data-why="A stub on your computer asks a recursive resolver. That resolver queries root, the top-level domain, and the authoritative server.">
+          <legend>Who walks from the root to the authoritative server in a normal lookup?</legend>
+            <label><input type="radio" name="dns-q2" value="browser"> The browser itself asks the root, the top-level domain, and the authoritative server</label>
+            <label><input type="radio" name="dns-q2" value="resolver"> A recursive resolver the computer is configured to use</label>
+            <label><input type="radio" name="dns-q2" value="push"> The authoritative server pushes the address out in advance</label>
+        </fieldset>
+        <fieldset data-answer="ttl" data-why="The zone publishes a TTL. After that many seconds, the cached answer is stale.">
+          <legend>What stops a cached DNS answer from being reused forever?</legend>
+            <label><input type="radio" name="dns-q3" value="ttl"> The TTL published with the record</label>
+            <label><input type="radio" name="dns-q3" value="tcp"> TCP retransmission</label>
+            <label><input type="radio" name="dns-q3" value="cert"> The certificate expiry date</label>
+        </fieldset>
+          <button type="button" class="btn btn-primary" data-quiz>Check answers</button>
+          <p class="quiz-result" role="status"></p>
+        </section>
+        <p class="sources">Sources: <a href="https://www.rfc-editor.org/rfc/rfc1034" target="_blank" rel="noopener noreferrer">RFC 1034</a> · <a href="https://www.rfc-editor.org/rfc/rfc1035" target="_blank" rel="noopener noreferrer">RFC 1035</a> · <a href="https://www.rfc-editor.org/rfc/rfc8305" target="_blank" rel="noopener noreferrer">RFC 8305</a> · <a href="https://www.rfc-editor.org/rfc/rfc7766" target="_blank" rel="noopener noreferrer">RFC 7766</a>. Pictures use small stand-in numbers so the steps are easy to see. They are teaching models, not a packet capture.</p>
+        <nav class="pager" aria-label="More lessons">
+          <span></span>
+          <a href="tcp.html">Next · How TCP carries a conversation</a>
+        </nav>
+      </article>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© 2026 Yash Tapadiya · <a href="../">Portfolio</a> · Learn with Me</p>
+    </div>
+  </footer>
+  <script src="js/learn.js"></script>
+</body>
+</html>

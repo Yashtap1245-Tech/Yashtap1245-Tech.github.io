@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" class="no-js" data-lesson="tcp">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    document.documentElement.classList.remove("no-js");
+    try {
+      var savedTheme = localStorage.getItem("yt-theme");
+      if (savedTheme === "light" || savedTheme === "dark") {
+        document.documentElement.setAttribute("data-theme", savedTheme);
+      }
+    } catch (err) {}
+  </script>
+  <title>How TCP carries a conversation — Learn with Me</title>
+  <meta name="description" content="See the TCP/IP layers, ports, the three-way handshake, retransmission, and connection teardown, with the sequence numbers shown.">
+  <meta name="author" content="Yash Tapadiya">
+  <meta name="theme-color" content="#0f1815">
+  <link rel="canonical" href="https://yashtap1245-tech.github.io/learn/tcp.html">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:site_name" content="Yash Tapadiya">
+  <meta property="og:title" content="How TCP carries a conversation — Learn with Me">
+  <meta property="og:description" content="See the TCP/IP layers, ports, the three-way handshake, retransmission, and connection teardown, with the sequence numbers shown.">
+  <meta property="og:url" content="https://yashtap1245-tech.github.io/learn/tcp.html">
+  <meta property="og:image" content="https://yashtap1245-tech.github.io/data/portrait.jpg">
+  <meta property="og:image:alt" content="Portrait of Yash Tapadiya">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="How TCP carries a conversation — Learn with Me">
+  <meta name="twitter:description" content="See the TCP/IP layers, ports, the three-way handshake, retransmission, and connection teardown, with the sequence numbers shown.">
+  <meta name="twitter:image" content="https://yashtap1245-tech.github.io/data/portrait.jpg">
+  <link rel="preload" href="../fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../fonts/source-sans-3.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../css/site.css">
+  <link rel="stylesheet" href="css/learn.css">
+  
+  <script type="application/ld+json">
+  {
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "How TCP carries a conversation",
+  "description": "See the TCP/IP layers, ports, the three-way handshake, retransmission, and connection teardown, with the sequence numbers shown.",
+  "url": "https://yashtap1245-tech.github.io/learn/tcp.html",
+  "isAccessibleForFree": true,
+  "inLanguage": "en",
+  "learningResourceType": "lesson",
+  "teaches": "TCP connections, the three-way handshake, retransmission, and teardown",
+  "author": {
+    "@type": "Person",
+    "name": "Yash Tapadiya",
+    "url": "https://yashtap1245-tech.github.io/"
+  }
+}
+  </script>
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="site-header" id="site-header">
+    <a class="logo" href="../">Yash Tapadiya</a>
+    <nav class="site-nav" id="site-nav" aria-label="Sections">
+      <ul class="nav-links">
+        <li><a href="../#about">About</a></li>
+        <li><a href="../#skills">Skills</a></li>
+        <li><a href="../#experience">Experience</a></li>
+        <li><a href="../#projects">Projects</a></li>
+        <li><a href="index.html" aria-current="page">Learn with Me</a></li>
+        <li><a href="../#contact">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false" aria-label="Switch to light mode">
+        <span class="theme-toggle-label">Light</span>
+      </button>
+      <a class="btn btn-primary nav-hire" href="mailto:yashtap1245@gmail.com">Contact Me</a>
+      <button type="button" class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    </div>
+    <div class="scroll-progress" aria-hidden="true"><span id="scroll-progress"></span></div>
+  </header>
+  <main id="content" tabindex="-1">
+    <div class="learn-layout">
+      <nav class="course-nav" aria-label="Lessons">
+        <p>Lessons</p>
+        <ol>
+          <li><a href="dns.html">URL lookup</a></li>
+          <li><a href="tcp.html" aria-current="page">TCP</a></li>
+          <li><a href="tls.html">TLS</a></li>
+          <li><a href="certificates.html">Certificates</a></li>
+          <li><a href="hashing.html">Hashing</a></li>
+          <li><a href="encryption.html">Encryption</a></li>
+        </ol>
+      </nav>
+      <article>
+        <header class="lesson-intro">
+          <p class="lesson-kicker">Lesson 2 of 6</p>
+          <h1>How TCP carries a conversation</h1>
+          <p class="lede">DNS found an address. TCP opens a reliable, ordered byte stream to it, notices when a segment goes missing, and closes the conversation with receipts. It does not hide the bytes.</p>
+          <ul class="learn-points">
+          <li>The four TCP/IP layers, and the four-tuple that names a connection</li>
+          <li>SYN, SYN-ACK, and ACK, including what the sequence numbers mean</li>
+          <li>Retransmission when an acknowledgment does not arrive, then a clean close</li>
+          </ul>
+        </header>
+        <div class="stage">
+          <div class="diagram-panel">
+            <div id="diagram" aria-hidden="true"></div>
+            <p id="diagram-caption" class="diagram-caption"></p>
+          </div>
+          <div class="step-column">
+            <div id="step-live">
+              <p id="step-count" class="step-count" aria-live="polite"></p>
+              <div id="steps">
+          <section class="step is-current" data-frame="layers">
+            <h2>Four wrappers around the same bytes</h2>
+            <p>The internet's working model has four layers. The HTTP request is application data. TCP adds ports and sequence numbers. IP adds the source and destination addresses. The link layer, Wi-Fi or Ethernet, carries that packet across the local network.</p>
+            <p>A router forwards on the IP address. It does not have to understand HTTP. Each hop removes the link frame and builds a new one for the next link. This is the model in RFC 1122. The seven-layer OSI picture is a teaching map. Packets on the wire follow these four.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> A packet is the same payload, wrapped. Each layer reads its own wrapper.</p>
+          </section>
+          <section class="step" data-frame="ports">
+            <h2>Ports choose the program</h2>
+            <p>An IP address identifies a machine. A port identifies a program on that machine. Ports are numbers from 0 to 65535. HTTPS servers listen on 443. Ordinary HTTP uses 80. DNS uses 53.</p>
+            <p>The browser also picks a temporary source port, often called an ephemeral port. <code>51422</code> in the picture is an example, and both IP addresses are documentation addresses. A connection is the four-tuple: source IP, source port, destination IP, destination port. That is how two tabs can talk to the same site at once.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> The address finds the machine. The port finds the program. The four-tuple finds the conversation.</p>
+          </section>
+          <section class="step" data-frame="syn">
+            <h2>SYN starts the handshake</h2>
+            <p>TCP does not put the page in the first packet. Each side needs the other's initial sequence number. Those numbers let the receiver put bytes back in order and notice a gap.</p>
+            <p>The browser sends a segment with the SYN flag. Its initial sequence number is written here as 1000. Real initial sequence numbers are unpredictable. 1000 is a small stand-in so the arithmetic stays visible. A SYN consumes one sequence number, so the next byte the browser sends will be numbered 1001.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> SYN means: I want a connection, and my byte count starts here.</p>
+          </section>
+          <section class="step" data-frame="synack">
+            <h2>SYN-ACK answers</h2>
+            <p>The server replies with SYN and ACK both set. SYN carries the server's own initial sequence number, 5000 in this picture. ACK 1001 means the server has the browser's SYN, and the next byte it expects is 1001.</p>
+            <p>The server's SYN consumes one sequence number too. Its next send will be 5001. RFC 9293 is the current TCP specification. The plus-one rule is the same one older books taught from RFC 793.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> SYN-ACK is the server's sequence number, plus a receipt for yours.</p>
+          </section>
+          <section class="step" data-frame="ack">
+            <h2>ACK opens the connection</h2>
+            <p>The browser sends an acknowledgment of 5001. It is saying it has the server's SYN, and the next byte it expects from the server is 5001. This segment's own sequence number is 1001.</p>
+            <p>The handshake is finished. Both starting numbers are confirmed, and the connection is established. The HTTP request still has not been sent. It can ride next, as ordinary data, starting at sequence 1001.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> The third step is a receipt. After it, either side may send data.</p>
+          </section>
+          <section class="step" data-frame="loss">
+            <h2>A lost segment is sent again</h2>
+            <p>IP is allowed to drop packets. TCP plans for that. Suppose the browser sends 100 bytes at sequence 1001 and that segment disappears. The browser keeps a copy until those bytes are acknowledged. If the acknowledgment does not arrive in time, it sends the same bytes again. The wait is the retransmission timeout, computed from the round-trip time (RFC 6298).</p>
+            <p>If later bytes do arrive, the receiver repeats an acknowledgment of the byte it is still missing. After duplicate acknowledgments, the sender can retransmit without waiting out the full timer. That is fast retransmit (RFC 5681). A bad checksum is dropped too, which looks like a loss, and the sender tries again.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> Reliability is a copy kept until it is acknowledged, and a resend when it is not.</p>
+          </section>
+          <section class="step" data-frame="close">
+            <h2>Four steps to hang up</h2>
+            <p>Either side can close. Here the browser is finished, after the 100 data bytes from the previous step. It sends a FIN at sequence 1101. A FIN consumes one sequence number.</p>
+            <p>The server acknowledges 1102, then sends its own FIN at sequence 5001, because this picture's server never sent application data. The browser acknowledges 5002. The server's acknowledgment and FIN are sometimes combined into one segment. The side that sent the first FIN waits in TIME-WAIT, so a delayed duplicate from this connection cannot be mistaken for a new one that reused the same four-tuple.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> Closing is its own handshake. Each side gets a receipt for its FIN.</p>
+          </section>
+          <section class="step" data-frame="recap">
+            <h2>Reliable, and still readable</h2>
+            <p>TCP gave the browser a byte stream that arrives in order, fills gaps by retransmission, and closes with receipts. Anyone on the path can still read a plain TCP payload.</p>
+            <p>UDP, which ordinary DNS queries often use, skips this handshake and does not retransmit for you. That is why a DNS answer can finish in one round trip, and why DNS has to cope with loss itself. Privacy for the HTTP bytes is the next lesson.</p>
+            <p class="key-idea"><span class="key-label">Key idea</span> TCP is reliable delivery. It is not encryption.</p>
+          </section>
+              </div>
+            </div>
+            <div class="controls">
+              <button type="button" id="prev">Previous</button>
+              <button type="button" id="replay">Replay</button>
+              <button type="button" id="play" aria-pressed="false">Play</button>
+              <button type="button" id="next" class="is-primary">Next</button>
+            </div>
+            <p class="control-hint">Arrow keys move between steps while a control in this lesson is focused.</p>
+            <ol class="stepper" id="stepper" aria-label="Steps"></ol>
+          </div>
+        </div>
+
+        <section class="takeaways" id="takeaways" aria-labelledby="takeaways-title">
+          <h2 id="takeaways-title">Takeaways</h2>
+          <ul>
+          <li>A TCP connection is the four-tuple of two IP addresses and two ports.</li>
+          <li>The handshake is SYN, SYN-ACK, ACK. Each SYN consumes a sequence number, so the acknowledgments are those numbers plus one.</li>
+          <li>The sender keeps data until it is acknowledged and resends if it is not. Closing uses FIN segments and receipts.</li>
+          </ul>
+        </section>
+        <section class="quiz" id="quiz" aria-labelledby="quiz-title">
+          <h2 id="quiz-title" tabindex="-1">Check yourself</h2>
+        <fieldset data-answer="open" data-why="Each side learns the other's initial sequence number and confirms it. Encryption is TLS, and the address lookup was DNS.">
+          <legend>What is the point of the three-way handshake?</legend>
+            <label><input type="radio" name="tcp-q1" value="open"> To agree on initial sequence numbers and open a connection both sides accept</label>
+            <label><input type="radio" name="tcp-q1" value="encrypt"> To encrypt the first HTTP request</label>
+            <label><input type="radio" name="tcp-q1" value="dns"> To look up the IP address</label>
+        </fieldset>
+        <fieldset data-answer="resend" data-why="The sender keeps unacknowledged bytes and retransmits. The receiver does not invent the missing bytes.">
+          <legend>A segment is lost. What does TCP do?</legend>
+            <label><input type="radio" name="tcp-q2" value="skip"> It delivers what arrived and ignores the gap</label>
+            <label><input type="radio" name="tcp-q2" value="resend"> The sender retransmits if the acknowledgment does not arrive</label>
+            <label><input type="radio" name="tcp-q2" value="dns"> DNS looks the address up again</label>
+        </fieldset>
+        <fieldset data-answer="tuple" data-why="Source IP, source port, destination IP, and destination port. The URL and the TLS keys are different layers.">
+          <legend>Which values identify one TCP connection?</legend>
+            <label><input type="radio" name="tcp-q3" value="tuple"> Source IP, source port, destination IP, and destination port</label>
+            <label><input type="radio" name="tcp-q3" value="url"> The URL, a cookie, the TLS version, and the cipher</label>
+            <label><input type="radio" name="tcp-q3" value="mac"> The MAC address alone</label>
+        </fieldset>
+          <button type="button" class="btn btn-primary" data-quiz>Check answers</button>
+          <p class="quiz-result" role="status"></p>
+        </section>
+        <p class="sources">Sources: <a href="https://www.rfc-editor.org/rfc/rfc9293" target="_blank" rel="noopener noreferrer">RFC 9293</a> · <a href="https://www.rfc-editor.org/rfc/rfc1122" target="_blank" rel="noopener noreferrer">RFC 1122</a> · <a href="https://www.rfc-editor.org/rfc/rfc6298" target="_blank" rel="noopener noreferrer">RFC 6298</a> · <a href="https://www.rfc-editor.org/rfc/rfc5681" target="_blank" rel="noopener noreferrer">RFC 5681</a>. Pictures use small stand-in numbers so the steps are easy to see. They are teaching models, not a packet capture.</p>
+        <nav class="pager" aria-label="More lessons">
+          <a href="dns.html">Previous · What happens when you type a URL</a>
+          <a href="tls.html">Next · How TLS builds a private channel</a>
+        </nav>
+      </article>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© 2026 Yash Tapadiya · <a href="../">Portfolio</a> · Learn with Me</p>
+    </div>
+  </footer>
+  <script src="js/learn.js"></script>
+</body>
+</html>
