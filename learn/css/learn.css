@@ -695,6 +695,170 @@ html[data-theme="light"] .hex-diff { color: #f4f7f4; }
   .flow li.is-on::before { background: CanvasText; }
 }
 
+.lesson-intro .lede,
+.learn-points { display: none; }
+
+.lesson-intro h1 {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+}
+
+.stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 18.5rem);
+  gap: 0.75rem;
+  align-items: start;
+  min-height: 0;
+}
+
+.diagram-panel {
+  min-height: 0;
+  background: #f6f1e6;
+  color: #1a2420;
+  border: 1px solid #d9d0c1;
+  border-top: 1px solid #d9d0c1;
+  border-radius: 16px;
+  padding: 0.7rem 0.75rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.iso-wrap,
+.bit-stage,
+.block-stage { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+.iso-svg { width: 100%; height: auto; max-height: 68vh; display: block; }
+
+.grid-line { fill: none; stroke: #e2d8c8; stroke-width: 1; }
+
+.iso-link { fill: none; stroke: #1a2420; stroke-width: 2.1; stroke-linecap: round; }
+.iso-link-dashed { stroke: #8d8376; stroke-dasharray: 5 4; }
+.iso-link-off { stroke: #c8bfb2; stroke-dasharray: 3 6; stroke-width: 1.6; }
+.iso-link-bad { stroke: #b42318; stroke-dasharray: 6 4; stroke-width: 2.3; }
+
+.cube { cursor: grab; }
+.cube:focus-visible { outline: none; }
+.cube:focus-visible .cube-label { text-decoration: underline; }
+.cube.is-dim { opacity: 0.38; }
+.cube-glow { fill: #b7d7c4; opacity: 0.9; }
+.cube-mark { font-family: "Fraunces", Georgia, serif; font-size: 16px; fill: #1a2420; }
+.cube-label { font-family: "Source Sans 3", sans-serif; font-size: 18px; font-weight: 700; fill: #1a2420; }
+.cube-sub { font-family: "Source Sans 3", sans-serif; font-size: 14px; fill: #5c564c; }
+.link-label { font-family: "Source Sans 3", sans-serif; font-size: 16px; font-weight: 700; fill: #1a2420; }
+.pkt-label { font-size: 15px; }
+
+.pkt circle { fill: #e7a15a; stroke: #1a2420; stroke-width: 1.6; }
+.pkt-res circle { fill: #7dcea0; }
+.pkt-bad circle, .pkt.is-dropped circle { fill: #e07a72; }
+.pkt-lock circle { fill: #24312b; stroke: #e4c48a; }
+.pkt-label { font-family: "Source Sans 3", sans-serif; font-size: 12px; font-weight: 700; fill: #1a2420; }
+
+.vchips, .stage-hud, .stage-tools { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.vchip, .stage-hud button, .stage-tools button {
+  border: 1px solid #1a2420;
+  background: #fffaf2;
+  color: #1a2420;
+  border-radius: 10px;
+  min-height: 36px;
+  padding: 0.25rem 0.55rem;
+  font: inherit;
+  font-size: 0.92rem;
+}
+.vchip { display: flex; flex-direction: column; min-width: 5.5rem; padding: 0.28rem 0.55rem; }
+.vchip span { color: #5c564c; font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; }
+.vchip b { font-size: 0.98rem; }
+.vchip.is-hot { box-shadow: inset 3px 0 0 #3f7d5c; }
+.stage-hud { order: 1; margin-bottom: 0.35rem; padding-right: 9.5rem; }
+#diagram { order: 2; flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.scrub { order: 4; }
+#diagram-caption { order: 5; }
+.node-detail { order: 6; }
+.stage-hud input, .stage-hud button { min-height: 40px; }
+.stage-hud input {
+  border: 1px solid #1a2420;
+  background: #fffaf2;
+  color: #1a2420;
+  border-radius: 10px;
+  padding: 0.35rem 0.55rem;
+  font: inherit;
+  width: min(14rem, 46vw);
+}
+.stage-hud button[aria-pressed="true"], .stage-tools button[aria-pressed="true"] {
+  background: #1a2420;
+  color: #f6f1e6;
+}
+.stage-tools { position: absolute; top: 0.7rem; right: 0.75rem; }
+.scrub { display: flex; align-items: center; gap: 0.55rem; margin-top: 0.25rem; color: #3c3830; }
+.scrub input { flex: 1; min-height: 36px; accent-color: #8a5418; }
+.vlegend { display: flex; gap: 0.35rem; align-items: center; color: #5c564c; font-size: 0.92rem; margin-top: 0.2rem; }
+.swatch { width: 0.7rem; height: 0.7rem; border-radius: 50%; border: 1.5px solid #1a2420; display: inline-block; }
+.swatch-req { background: #e7a15a; }
+.swatch-res { background: #7dcea0; }
+.swatch-bad { background: #e07a72; }
+.node-detail { min-height: 1.4rem; margin-top: 0.25rem; color: #1a2420; }
+
+.step-column {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 0.9rem 0.95rem 1rem;
+}
+.step p:not(.key-idea) {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.step p:not(.key-idea) + p:not(.key-idea) { display: none; }
+.step h2 { font-size: clamp(1.45rem, 2vw, 1.9rem); }
+
+.bit-stage { gap: 0.7rem; }
+.bit-count { font-family: "Fraunces", Georgia, serif; font-size: clamp(1.4rem, 2.5vw, 2rem); letter-spacing: -0.03em; }
+.bit-word { font-weight: 700; margin-bottom: 0.25rem; }
+.bit-grid { display: grid; grid-template-columns: repeat(32, 1fr); gap: 2px; max-width: 640px; }
+.bit { aspect-ratio: 1; background: #e7dfd2; border-radius: 2px; }
+.bit.is-on { background: #c48a3a; }
+.bit.is-diff { outline: 1px solid #1a2420; }
+.bit-note { color: #5c564c; max-width: 62ch; }
+.block-stage { justify-content: center; gap: 1rem; min-height: 280px; }
+.block-kicker { font-family: "Fraunces", Georgia, serif; font-size: clamp(1.4rem, 2.4vw, 2rem); letter-spacing: -0.03em; max-width: 28ch; }
+.block-row { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.plain-block {
+  min-width: 4.6rem;
+  min-height: 4.2rem;
+  padding: 0.7rem;
+  border: 1.5px solid #1a2420;
+  border-radius: 12px;
+  background: #fffaf2;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.plain-block.is-locked { background: #24312b; color: #f6e7c1; }
+.plain-block.is-bad { background: #f8ddd8; color: #7a1f18; }
+.block-banner { max-width: 46ch; font-size: 1.05rem; }
+.block-banner.is-bad { color: #7a1f18; font-weight: 700; }
+
+.landing-stage {
+  margin-top: 1.2rem;
+  background: #f6f1e6;
+  border-radius: 16px;
+  min-height: 420px;
+  padding: 0.6rem;
+  border: 1px solid #d9d0c1;
+}
+.landing-stage .iso-svg { height: auto; max-height: none; }
+
+@media (max-width: 980px) {
+  .stage { grid-template-columns: 1fr; min-height: 0; }
+  .diagram-panel, .iso-svg { min-height: 0; }
+  .iso-svg { height: auto; max-height: none; }
+  .stage-tools { position: static; margin: 0.35rem 0; }
+  .bit-grid { grid-template-columns: repeat(16, 1fr); }
+}
+
 @media print {
   .controls,
   .stepper,

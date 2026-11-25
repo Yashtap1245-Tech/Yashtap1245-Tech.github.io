@@ -648,19 +648,212 @@
     hashvis: renderHash
   };
 
+  const hud = {
+    host: "example.com",
+    cache: "miss",
+    drop: false,
+    version: "1.3",
+    fault: "none",
+    a: "connection",
+    b: "connexction",
+    salt: true,
+    text: "GET /docs",
+    tamper: false,
+    secret: ""
+  };
+
   function renderFrame(frameId) {
     const diagram = document.getElementById("diagram");
-    const caption = document.getElementById("diagram-caption");
-    if (!diagram || !caption) return;
-    const frame = (FRAMES[lessonId] || {})[frameId];
-    diagram.replaceChildren();
-    if (!frame) {
-      caption.textContent = "";
-      return;
+    const scrub = document.getElementById("scrub");
+    if (!diagram || !window.LearnStage) return;
+    if (scrub) scrub.value = "0";
+    const hashA = document.getElementById("hash-input");
+    const hashB = document.getElementById("hash-flip");
+    if (hashA && document.activeElement !== document.getElementById("hud-a")) hud.a = hashA.value || hud.a;
+    if (hashB && document.activeElement !== document.getElementById("hud-b")) hud.b = hashB.value || hud.b;
+    window.LearnStage.mount(diagram, lessonId, frameId, hud, {
+      onDetail: function (text) {
+        const slot = document.getElementById("node-detail");
+        if (slot) slot.textContent = text;
+      }
+    });
+  }
+
+  function buildHud(redraw) {
+    const panel = document.querySelector(".diagram-panel");
+    if (!panel || document.getElementById("stage-hud")) return;
+    const hudBar = document.createElement("div");
+    hudBar.className = "stage-hud";
+    hudBar.id = "stage-hud";
+    function btn(id, label, pressed) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.id = id;
+      button.textContent = label;
+      if (pressed) button.setAttribute("aria-pressed", "true");
+      return button;
     }
-    const build = BUILDERS[frame.kind] || renderFlow;
-    diagram.append(build(frame));
-    caption.textContent = frame.caption || "";
+    if (lessonId === "dns") {
+      const label = document.createElement("label");
+      label.setAttribute("for", "hud-host");
+      label.textContent = "Name";
+      const input = document.createElement("input");
+      input.id = "hud-host";
+      input.value = hud.host;
+      input.autocomplete = "off";
+      input.spellcheck = false;
+      input.addEventListener("input", function () {
+        hud.host = input.value || "example.com";
+        redraw();
+      });
+      const cache = btn("hud-cache", "Cache miss", false);
+      cache.addEventListener("click", function () {
+        hud.cache = hud.cache === "hit" ? "miss" : "hit";
+        cache.textContent = hud.cache === "hit" ? "Cache hit" : "Cache miss";
+        cache.setAttribute("aria-pressed", String(hud.cache === "hit"));
+        redraw();
+      });
+      hudBar.append(label, input, cache);
+    } else if (lessonId === "tcp") {
+      const drop = btn("hud-drop", "Drop a segment", false);
+      drop.setAttribute("aria-pressed", "false");
+      drop.addEventListener("click", function () {
+        hud.drop = !hud.drop;
+        drop.setAttribute("aria-pressed", String(hud.drop));
+        drop.textContent = hud.drop ? "Dropping a segment" : "Drop a segment";
+        redraw();
+      });
+      hudBar.append(drop);
+    } else if (lessonId === "tls") {
+      const version = btn("hud-tls", "TLS 1.3", true);
+      version.addEventListener("click", function () {
+        hud.version = hud.version === "1.3" ? "1.2" : "1.3";
+        version.textContent = hud.version === "1.3" ? "TLS 1.3" : "TLS 1.2";
+        version.setAttribute("aria-pressed", String(hud.version === "1.2"));
+        redraw();
+      });
+      hudBar.append(version);
+    } else if (lessonId === "certificates") {
+      ["none", "name", "expired", "root"].forEach(function (fault) {
+        const names = { none: "Intact", name: "Wrong name", expired: "Expired", root: "Bad root" };
+        const button = btn("hud-fault-" + fault, names[fault], fault === "none");
+        button.addEventListener("click", function () {
+          hud.fault = fault;
+          hudBar.querySelectorAll("button").forEach(function (item) {
+            item.setAttribute("aria-pressed", String(item === button));
+          });
+          redraw();
+        });
+        hudBar.append(button);
+      });
+    } else if (lessonId === "hashing") {
+      const a = document.createElement("input");
+      a.id = "hud-a";
+      a.value = hud.a;
+      a.setAttribute("aria-label", "First text");
+      const b = document.createElement("input");
+      b.id = "hud-b";
+      b.value = hud.b;
+      b.setAttribute("aria-label", "Second text");
+      function push() {
+        hud.a = a.value;
+        hud.b = b.value;
+        const labA = document.getElementById("hash-input");
+        const labB = document.getElementById("hash-flip");
+        if (labA) { labA.value = a.value; labA.dispatchEvent(new Event("input")); }
+        if (labB) labB.value = b.value;
+        redraw();
+      }
+      a.addEventListener("input", push);
+      b.addEventListener("input", push);
+      const salt = btn("hud-salt", "Salt on", true);
+      salt.addEventListener("click", function () {
+        hud.salt = !hud.salt;
+        salt.textContent = hud.salt ? "Salt on" : "Salt off";
+        salt.setAttribute("aria-pressed", String(hud.salt));
+        redraw();
+      });
+      hudBar.append(a, b, salt);
+    } else if (lessonId === "encryption") {
+      const input = document.createElement("input");
+      input.id = "hud-text";
+      input.value = hud.text;
+      input.setAttribute("aria-label", "Message");
+      input.addEventListener("input", function () {
+        hud.text = input.value;
+        const plain = document.getElementById("aes-plain");
+        const sign = document.getElementById("sign-msg");
+        if (plain) plain.value = input.value;
+        if (sign) sign.value = input.value;
+        redraw();
+      });
+      const tamper = btn("hud-tamper", "Tamper", false);
+      tamper.setAttribute("aria-pressed", "false");
+      tamper.addEventListener("click", function () {
+        hud.tamper = !hud.tamper;
+        tamper.setAttribute("aria-pressed", String(hud.tamper));
+        redraw();
+      });
+      const agree = btn("hud-agree", "Run the exchange", false);
+      agree.addEventListener("click", async function () {
+        if (!window.crypto || !crypto.subtle) return;
+        agree.disabled = true;
+        agree.textContent = "Deriving…";
+        try {
+          const alice = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]);
+          const bob = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]);
+          const bits = new Uint8Array(await crypto.subtle.deriveBits({ name: "ECDH", public: bob.publicKey }, alice.privateKey, 256));
+          const other = new Uint8Array(await crypto.subtle.deriveBits({ name: "ECDH", public: alice.publicKey }, bob.privateKey, 256));
+          hud.secret = toHex(bits);
+          const slot = document.getElementById("node-detail");
+          if (slot) slot.textContent = hud.secret === toHex(other) ? "Both secrets match. Neither private key was sent." : "The secrets did not match.";
+          redraw();
+        } finally {
+          agree.disabled = false;
+          agree.textContent = "Run the exchange";
+        }
+      });
+      hudBar.append(input, tamper, agree);
+    }
+    const tools = document.createElement("div");
+    tools.className = "stage-tools";
+    const replay = btn("stage-replay", "Replay");
+    const pause = btn("stage-pause", "Pause");
+    pause.setAttribute("aria-pressed", "false");
+    replay.addEventListener("click", function () {
+      if (window.LearnStage) window.LearnStage.replay();
+      const scrub = document.getElementById("scrub");
+      if (scrub) scrub.value = "0";
+    });
+    pause.addEventListener("click", function () {
+      const paused = window.LearnStage && window.LearnStage.pause();
+      pause.setAttribute("aria-pressed", String(Boolean(paused)));
+      pause.textContent = paused ? "Play" : "Pause";
+    });
+    tools.append(replay, pause);
+    const scrubWrap = document.createElement("div");
+    scrubWrap.className = "scrub";
+    const scrubLabel = document.createElement("label");
+    scrubLabel.setAttribute("for", "scrub");
+    scrubLabel.textContent = "Timeline";
+    const scrub = document.createElement("input");
+    scrub.id = "scrub";
+    scrub.type = "range";
+    scrub.min = "0";
+    scrub.max = "100";
+    scrub.value = "0";
+    scrub.addEventListener("input", function () {
+      if (window.LearnStage) window.LearnStage.scrub(Number(scrub.value) / 100);
+    });
+    scrubWrap.append(scrubLabel, scrub);
+    const detail = document.createElement("p");
+    detail.id = "node-detail";
+    detail.className = "node-detail";
+    detail.textContent = "Click a cube, or drag it. The links follow.";
+    const diagram = document.getElementById("diagram");
+    if (diagram) panel.insertBefore(hudBar, diagram);
+    else panel.append(hudBar);
+    panel.append(tools, scrubWrap, detail);
   }
 
   function initChrome() {
@@ -776,6 +969,10 @@
     }
     const bar = document.getElementById("scroll-progress");
     if (bar) bar.style.transform = "scaleX(" + (done / 6) + ")";
+    const preview = document.getElementById("landing-stage");
+    if (preview && window.LearnStage) {
+      window.LearnStage.mount(preview, "dns", "root", { host: "example.com", cache: "miss" }, {});
+    }
   }
 
   function initPlayer() {
@@ -977,6 +1174,9 @@
     const quizTitle = document.getElementById("quiz-title");
     if (quizTitle && !quizTitle.hasAttribute("tabindex")) quizTitle.tabIndex = -1;
 
+    buildHud(function () {
+      renderFrame(steps[index].dataset.frame || "");
+    });
     show(index, { scroll: false, replaceHash: true });
   }
 

@@ -111,6 +111,8 @@ def chrome(title, description, canonical, lesson_id, body, json_ld, extra_head="
       <p>© 2026 Yash Tapadiya · <a href="../">Portfolio</a> · Learn with Me</p>
     </div>
   </footer>
+  <script src="../vendor/gsap.min.js"></script>
+  <script src="js/stage.js"></script>
   <script src="js/learn.js"></script>
 </body>
 </html>
@@ -176,7 +178,7 @@ def lesson_page(lesson, labs=""):
         </header>
         <div class="stage">
           <div class="diagram-panel">
-            <div id="diagram" aria-hidden="true"></div>
+            <div id="diagram"></div>
             <p id="diagram-caption" class="diagram-caption"></p>
           </div>
           <div class="step-column">
@@ -1144,6 +1146,7 @@ def landing():
         <p class="lede">Six short lessons on how a connection is made, and how it becomes private. Each one is a picture you step through. The cryptography runs in your browser.</p>
         <p class="course-note">No account. No install. Progress stays in this browser. The numbers in the diagrams are teaching stand-ins, and each lesson links the specification it follows.</p>
         <p class="course-progress" id="course-progress">No lessons completed on this browser yet.</p>
+        <div class="landing-stage" id="landing-stage" aria-hidden="true"></div>
         <ol class="lesson-index" id="lesson-index">
 {chr(10).join(lis)}
         </ol>
