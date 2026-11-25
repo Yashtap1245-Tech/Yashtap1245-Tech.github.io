@@ -1177,6 +1177,16 @@
     buildHud(function () {
       renderFrame(steps[index].dataset.frame || "");
     });
+    const stageEl = document.querySelector(".stage");
+    if (stageEl && stepper && !document.querySelector(".lesson-rail")) {
+      const rail = document.createElement("div");
+      rail.className = "lesson-rail";
+      const railLabel = document.createElement("p");
+      railLabel.className = "rail-label";
+      railLabel.textContent = "In this lesson";
+      rail.append(railLabel, stepper);
+      stageEl.append(rail);
+    }
     show(index, { scroll: false, replaceHash: true });
   }
 

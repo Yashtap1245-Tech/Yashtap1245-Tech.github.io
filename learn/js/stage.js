@@ -50,27 +50,37 @@
     return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }
 
-  function project(gx, gy) {
-    return {
-      x: 480 + (gx - gy) * 86,
-      y: 210 + (gx + gy) * 40
+  const VW = 1200;
+  const VH = 680;
+  let mapper = function () { return { x: VW / 2, y: VH / 2 }; };
+
+  function makeMapper(nodes) {
+    const list = nodes && nodes.length ? nodes : [{ gx: 0, gy: 0 }];
+    const xs = list.map(function (node) { return node.gx; });
+    const ys = list.map(function (node) { return node.gy; });
+    const minX = Math.min.apply(null, xs);
+    const maxX = Math.max.apply(null, xs);
+    const minY = Math.min.apply(null, ys);
+    const maxY = Math.max.apply(null, ys);
+    const spanX = Math.max(1, maxX - minX);
+    const spanY = Math.max(1, maxY - minY);
+    return function (gx, gy) {
+      const u = (gx - minX) / spanX;
+      const v = (gy - minY) / spanY;
+      return { x: 200 + u * 800, y: 210 + v * 250 };
     };
   }
 
   function posOf(node) {
-    const p = project(node.gx, node.gy);
+    const p = mapper(node.gx, node.gy);
     const extra = offsets[node.id] || { x: 0, y: 0 };
     return { x: p.x + extra.x, y: p.y + extra.y };
   }
 
   function curve(a, b) {
-    const x1 = a.x;
-    const y1 = a.y;
-    const x2 = b.x;
-    const y2 = b.y;
-    const mx = (x1 + x2) / 2;
-    const my = (y1 + y2) / 2 - 26;
-    return "M " + x1 + " " + y1 + " Q " + mx + " " + my + " " + x2 + " " + y2;
+    const mx = (a.x + b.x) / 2;
+    const my = Math.min(a.y, b.y) - 70;
+    return "M " + a.x.toFixed(1) + " " + a.y.toFixed(1) + " Q " + mx.toFixed(1) + " " + my.toFixed(1) + " " + b.x.toFixed(1) + " " + b.y.toFixed(1);
   }
 
   function kill() {
@@ -78,62 +88,138 @@
     current = null;
   }
 
+  function stroke(node) {
+    node.setAttribute("stroke", "#2a241c");
+    node.setAttribute("stroke-width", "1.75");
+    node.setAttribute("stroke-linejoin", "round");
+    node.setAttribute("stroke-linecap", "round");
+    node.setAttribute("vector-effect", "non-scaling-stroke");
+  }
+
+  function face(g, d, fill) {
+    const path = svgEl("path", { d: d, fill: fill });
+    stroke(path);
+    g.append(path);
+    return path;
+  }
+
+  function iso(x, y, z) {
+    return [(x - y) * 0.92, (x + y) * 0.46 - z];
+  }
+
+  function poly(pts) {
+    return pts.map(function (p, i) {
+      return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1);
+    }).join(" ") + " Z";
+  }
+
   function drawGrid(svg) {
-    const g = svgEl("g", { class: "iso-grid", "aria-hidden": "true" });
-    for (let i = -1; i <= 6; i += 1) {
-      const a = project(i, -1.2);
-      const b = project(i, 4.2);
-      const c = project(-1.2, i);
-      const d = project(5.2, i);
-      g.append(svgEl("path", { d: "M " + a.x + " " + a.y + " L " + b.x + " " + b.y, class: "grid-line" }));
-      g.append(svgEl("path", { d: "M " + c.x + " " + c.y + " L " + d.x + " " + d.y, class: "grid-line" }));
+    const g = svgEl("g", { "aria-hidden": "true" });
+    for (let i = -8; i <= 22; i += 1) {
+      const a = iso(-520 + i * 56, -360, 0);
+      const b = iso(-520 + i * 56, 520, 0);
+      const c = iso(-640, -300 + i * 56, 0);
+      const d = iso(760, -300 + i * 56, 0);
+      [ [a, b], [c, d] ].forEach(function (pair) {
+        const path = svgEl("path", {
+          d: "M " + (600 + pair[0][0]) + " " + (430 + pair[0][1]) + " L " + (600 + pair[1][0]) + " " + (430 + pair[1][1]),
+          fill: "none",
+          stroke: "#e6dccb",
+          "stroke-width": "1",
+          "vector-effect": "non-scaling-stroke"
+        });
+        g.append(path);
+      });
     }
     svg.append(g);
   }
 
-  function drawCube(svg, node, point) {
-    const tone = TONES[node.tone] || TONES.sand;
-    const g = svgEl("g", { class: "cube" + (node.dim ? " is-dim" : "") + (node.hot ? " is-hot" : ""), tabindex: "0", role: "button" });
-    g.dataset.id = node.id;
-    const x = point.x;
-    const y = point.y;
-    const w = 54;
-    const h = 24;
-    const depth = 30;
-    if (node.hot) {
-      g.append(svgEl("ellipse", { cx: x, cy: y + depth + 16, rx: 46, ry: 14, class: "cube-glow" }));
+  function icon(g, mark) {
+    const key = (mark || "").toLowerCase();
+    if (key.indexOf("dns") >= 0 || key === ".") {
+      const c = svgEl("circle", { cx: 0, cy: -6, r: 16, fill: "none" });
+      stroke(c);
+      g.append(c);
+      const h = svgEl("path", { d: "M -16 -6 H 16 M 0 -22 V 10", fill: "none" });
+      stroke(h);
+      g.append(h);
+      return;
     }
-    g.append(svgEl("path", {
-      d: "M " + (x - w) + " " + y + " L " + x + " " + (y + h) + " L " + x + " " + (y + h + depth) + " L " + (x - w) + " " + (y + depth) + " Z",
-      fill: tone[2]
-    }));
-    g.append(svgEl("path", {
-      d: "M " + (x + w) + " " + y + " L " + x + " " + (y + h) + " L " + x + " " + (y + h + depth) + " L " + (x + w) + " " + (y + depth) + " Z",
-      fill: tone[1]
-    }));
-    g.append(svgEl("path", {
-      d: "M " + x + " " + (y - h) + " L " + (x + w) + " " + y + " L " + x + " " + (y + h) + " L " + (x - w) + " " + y + " Z",
-      fill: tone[0],
-      stroke: "#1a2420",
-      "stroke-width": "1.4"
-    }));
-    const mark = svgEl("text", { x: x, y: y + 4, "text-anchor": "middle", class: "cube-mark" });
-    mark.textContent = node.mark || "";
-    g.append(mark);
-    const label = svgEl("text", { x: x, y: y + depth + 36, "text-anchor": "middle", class: "cube-label" });
-    label.textContent = node.label;
+    if (key.indexOf("443") >= 0 || key === "1.3" || key === "1.2" || key === "lock") {
+      const body = svgEl("rect", { x: -12, y: -4, width: 24, height: 18, rx: 3, fill: "#2a241c" });
+      g.append(body);
+      const shackle = svgEl("path", { d: "M -7 -4 V -12 a 7 7 0 0 1 14 0 V -4", fill: "none" });
+      stroke(shackle);
+      g.append(shackle);
+      return;
+    }
+    const disc = svgEl("circle", { cx: 0, cy: -4, r: 15, fill: "rgba(42,36,28,0.12)" });
+    stroke(disc);
+    g.append(disc);
+    const label = svgEl("text", { x: 0, y: 1, "text-anchor": "middle", class: "face-mark" });
+    label.textContent = (mark || "").slice(0, 3);
     g.append(label);
-    if (node.sub) {
-      const sub = svgEl("text", { x: x, y: y + depth + 52, "text-anchor": "middle", class: "cube-sub" });
-      sub.textContent = node.sub;
-      g.append(sub);
-    }
+  }
+
+  function drawServer(g, node) {
+    const tone = TONES[node.tone] || TONES.sand;
+    g.append(svgEl("ellipse", { cx: 0, cy: 86, rx: 78, ry: 18, fill: "rgba(70,48,24,0.10)" }));
+    if (node.hot) g.append(svgEl("ellipse", { cx: 0, cy: 86, rx: 86, ry: 20, fill: "rgba(63,160,96,0.28)" }));
+    const w = 86;
+    const h = 40;
+    const depth = 46;
+    face(g, "M " + (-w) + " 0 L 0 " + h + " L 0 " + (h + depth) + " L " + (-w) + " " + depth + " Z", tone[2]);
+    face(g, "M " + w + " 0 L 0 " + h + " L 0 " + (h + depth) + " L " + w + " " + depth + " Z", tone[1]);
+    face(g, "M 0 " + (-h) + " L " + w + " 0 L 0 " + h + " L " + (-w) + " 0 Z", tone[0]);
+    icon(g, node.mark);
+  }
+
+  function drawBox(g, w, h, depth, tone, dy) {
+    const y = dy || 0;
+    face(g, "M " + (-w) + " " + y + " L 0 " + (y + h) + " L 0 " + (y + h + depth) + " L " + (-w) + " " + (y + depth) + " Z", tone[2]);
+    face(g, "M " + w + " " + y + " L 0 " + (y + h) + " L 0 " + (y + h + depth) + " L " + w + " " + (y + depth) + " Z", tone[1]);
+    face(g, "M 0 " + (y - h) + " L " + w + " " + y + " L 0 " + (y + h) + " L " + (-w) + " " + y + " Z", tone[0]);
+  }
+
+  function drawLaptop(g) {
+    g.append(svgEl("ellipse", { cx: 8, cy: 118, rx: 130, ry: 22, fill: "rgba(70,48,24,0.12)" }));
+    drawBox(g, 78, 32, 110, ["#f4f0e8", "#3a414a", "#22262c"], -18);
+    face(g, "M 64 -4 L 14 16 L 14 96 L 64 76 Z", "#f7f4ee");
+    const lines = svgEl("path", {
+      d: "M 24 30 H 54 M 24 44 H 46",
+      fill: "none",
+      stroke: "#d5cbbd",
+      "stroke-width": "2.2",
+      "vector-effect": "non-scaling-stroke"
+    });
+    g.append(lines);
+    drawBox(g, 112, 44, 18, ["#f6ead2", "#e4d0aa", "#c9b48e"], 72);
+    const keys = svgEl("path", {
+      d: "M -50 90 H 58 M -44 100 H 48",
+      fill: "none",
+      stroke: "#b7a488",
+      "stroke-width": "1.7",
+      "vector-effect": "non-scaling-stroke"
+    });
+    g.append(keys);
+  }
+
+  function addDevice(node) {
+    const g = svgEl("g", {
+      class: "cube" + (node.dim ? " is-dim" : "") + (node.hot ? " is-hot" : ""),
+      tabindex: "0",
+      role: "button"
+    });
+    g.dataset.id = node.id;
+    const kind = (node.id === "browser" || node.id === "client") ? "laptop" : "cube";
+    if (kind === "laptop") drawLaptop(g);
+    else drawServer(g, node);
     g.setAttribute("aria-label", node.label + ". " + (DETAILS[node.id] || node.sub || "Show this machine"));
-    svg.append(g);
     return g;
   }
 
   function mountIso(root, scene, hooks) {
+    mapper = makeMapper(scene.nodes || []);
     const wrap = el("div", "iso-wrap");
     const chips = el("div", "vchips");
     (scene.chips || []).forEach(function (chip) {
@@ -141,7 +227,12 @@
       card.append(el("span", "", chip.k), el("b", "", chip.v));
       chips.append(card);
     });
-    const svg = svgEl("svg", { class: "iso-svg", viewBox: "0 0 860 520" });
+    const frame = el("div", "iso-frame");
+    const svg = svgEl("svg", {
+      class: "iso-svg",
+      viewBox: "0 0 " + VW + " " + VH,
+      preserveAspectRatio: "xMidYMid meet"
+    });
     svg.setAttribute("role", "img");
     svg.setAttribute("aria-label", scene.caption || "Diagram");
     drawGrid(svg);
@@ -149,42 +240,52 @@
     const linkEls = {};
     const linkLabels = [];
     (scene.links || []).forEach(function (link) {
-      const path = svgEl("path", { class: "iso-link iso-link-" + (link.style || "solid"), d: "M0 0" });
+      const path = svgEl("path", {
+        class: "iso-link iso-link-" + (link.style || "solid"),
+        d: "M0 0",
+        fill: "none",
+        "vector-effect": "non-scaling-stroke"
+      });
       path.dataset.from = link.from;
       path.dataset.to = link.to;
       svg.append(path);
       linkEls[link.from + ">" + link.to] = path;
-      if (link.label) {
-        const text = svgEl("text", { "text-anchor": "middle", class: "link-label" });
-        text.textContent = link.label;
-        svg.append(text);
-        linkLabels.push({ text: text, path: path });
-      }
     });
+    const labels = el("div", "iso-labels");
     const nodeEls = {};
+    const nameEls = {};
     (scene.nodes || []).forEach(function (node) {
-      const g = drawCube(svg, node, project(node.gx, node.gy));
+      const g = addDevice(node);
       nodeEls[node.id] = g;
-      function show() {
-        if (hooks.onDetail) hooks.onDetail(node.label + " — " + (DETAILS[node.id] || node.sub || "Part of this step."));
-        g.classList.add("is-picked");
+      svg.append(g);
+      const name = el("p", "iso-name");
+      name.textContent = node.label;
+      labels.append(name);
+      nameEls[node.id] = name;
+      if (node.sub && node.hot) {
+        name.textContent = node.label;
       }
-      g.addEventListener("click", show);
-      g.addEventListener("keydown", function (event) {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          show();
-        }
-      });
+      function show() {
+        if (hooks.onDetail) hooks.onDetail(node.label + " — " + (DETAILS[node.id] || node.sub || "Show this machine."));
+      }
       g.addEventListener("pointerdown", function (event) {
         if (event.button !== 0) return;
+        g.setPointerCapture(event.pointerId);
         const id = node.id;
-        const start = { x: event.clientX, y: event.clientY, ox: (offsets[id] || { x: 0 }).x, oy: (offsets[id] || { y: 0 }).y };
+        const start = {
+          x: event.clientX,
+          y: event.clientY,
+          ox: (offsets[id] || { x: 0 }).x,
+          oy: (offsets[id] || { y: 0 }).y
+        };
         let moved = false;
         function move(ev) {
-          const dx = ev.clientX - start.x;
-          const dy = ev.clientY - start.y;
-          if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+          const rect = svg.getBoundingClientRect();
+          const sx = VW / Math.max(1, rect.width);
+          const sy = VH / Math.max(1, rect.height);
+          const dx = (ev.clientX - start.x) * sx;
+          const dy = (ev.clientY - start.y) * sy;
+          if (Math.abs(dx) + Math.abs(dy) > 3) moved = true;
           offsets[id] = { x: start.ox + dx, y: start.oy + dy };
           layoutNodes();
         }
@@ -196,75 +297,82 @@
         g.addEventListener("pointermove", move);
         g.addEventListener("pointerup", up);
       });
+      g.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          show();
+        }
+      });
     });
 
-    const pktLayer = svgEl("g", { class: "pkt-layer" });
+    const pktLayer = svgEl("g");
     svg.append(pktLayer);
     const packets = (scene.packets || []).map(function (spec) {
       const g = svgEl("g", { class: "pkt pkt-" + (spec.kind || "req") });
-      g.append(svgEl("circle", { r: "13" }));
-      if (spec.label) {
-        const text = svgEl("text", { y: -14, "text-anchor": "middle", class: "pkt-label" });
-        text.textContent = spec.label;
-        g.append(text);
-      }
+      const circle = svgEl("circle", { r: "11" });
+      stroke(circle);
+      g.append(circle);
       g.setAttribute("opacity", "0");
       pktLayer.append(g);
-      return { spec: spec, el: g };
+      const tag = el("span", "pkt-float pkt-float-" + (spec.kind || "req"));
+      tag.textContent = spec.label || "";
+      if (!spec.label) tag.hidden = true;
+      labels.append(tag);
+      return { spec: spec, el: g, tag: tag };
     });
 
-    wrap.append(chips, svg);
+    frame.append(svg, labels);
+    wrap.append(chips, frame);
     const legend = el("p", "vlegend");
     legend.append(el("i", "swatch swatch-req"), document.createTextNode(" request "));
     legend.append(el("i", "swatch swatch-res"), document.createTextNode(" response "));
-    legend.append(el("i", "swatch swatch-bad"), document.createTextNode(" lost or rejected"));
+    legend.append(el("i", "swatch swatch-bad"), document.createTextNode(" lost"));
     wrap.append(legend);
     root.replaceChildren(wrap);
+
+    function put(elm, x, y) {
+      elm.style.left = (x / VW * 100) + "%";
+      elm.style.top = (y / VH * 100) + "%";
+    }
 
     function layoutNodes() {
       (scene.nodes || []).forEach(function (node) {
         points[node.id] = posOf(node);
         const g = nodeEls[node.id];
-        if (!g) return;
-        const extra = offsets[node.id] || { x: 0, y: 0 };
-        g.setAttribute("transform", "translate(" + extra.x + " " + extra.y + ")");
+        const point = points[node.id];
+        if (g) g.setAttribute("transform", "translate(" + point.x.toFixed(1) + " " + point.y.toFixed(1) + ")");
+        const drop = (node.id === "browser" || node.id === "client") ? 158 : 112;
+        if (nameEls[node.id]) put(nameEls[node.id], point.x, point.y + drop);
+        if (nameEls[node.id + "-sub"]) put(nameEls[node.id + "-sub"], point.x, point.y + drop + 22);
       });
       (scene.links || []).forEach(function (link) {
         const path = linkEls[link.from + ">" + link.to];
         const a = points[link.from];
         const b = points[link.to];
         if (path && a && b) path.setAttribute("d", curve(a, b));
+        if (link.label && path) {
+          let text = linkLabels.find(function (item) { return item.link === link; });
+          if (!text) {
+            text = { link: link, el: el("span", "link-float") };
+            text.el.textContent = link.label;
+            labels.append(text.el);
+            linkLabels.push(text);
+          }
+        }
       });
       linkLabels.forEach(function (item) {
-        const len = item.path.getTotalLength();
+        const path = linkEls[item.link.from + ">" + item.link.to];
+        if (!path) return;
+        const len = path.getTotalLength();
         if (!len) return;
-        const mid = item.path.getPointAtLength(len * 0.5);
-        item.text.setAttribute("x", mid.x);
-        item.text.setAttribute("y", mid.y - 10);
+        const mid = path.getPointAtLength(len * 0.5);
+        put(item.el, mid.x, mid.y - 18);
       });
-      if (!svg.dataset.fit) {
-        const focus = (scene.nodes || []).filter(function (node) { return !node.dim; });
-        const used = (focus.length ? focus : (scene.nodes || [])).map(function (node) { return points[node.id]; }).filter(Boolean);
-        if (used.length) {
-          let minX = Infinity;
-          let minY = Infinity;
-          let maxX = -Infinity;
-          let maxY = -Infinity;
-          used.forEach(function (point) {
-            minX = Math.min(minX, point.x - 78);
-            maxX = Math.max(maxX, point.x + 78);
-            minY = Math.min(minY, point.y - 36);
-            maxY = Math.max(maxY, point.y + 96);
-          });
-          const vbW = Math.max(220, maxX - minX);
-          const vbH = Math.max(180, maxY - minY);
-          svg.setAttribute("viewBox", minX + " " + minY + " " + vbW + " " + vbH);
-          svg.style.aspectRatio = vbW + " / " + vbH;
-          svg.style.height = "auto";
-          svg.dataset.fit = "1";
-        }
-      }
       drawPackets();
+    }
+
+    function ease(u) {
+      return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
     }
 
     const clock = { t: 0 };
@@ -272,15 +380,19 @@
       const path = linkEls[packet.spec.from + ">" + packet.spec.to];
       if (!path) return;
       const len = path.getTotalLength();
+      if (!len) return;
       const clamped = Math.max(0, Math.min(1, u));
-      const point = path.getPointAtLength(len * clamped);
-      packet.el.setAttribute("transform", "translate(" + point.x + " " + point.y + ")");
+      const point = path.getPointAtLength(len * ease(clamped));
+      packet.el.setAttribute("transform", "translate(" + point.x.toFixed(1) + " " + point.y.toFixed(1) + ")");
       packet.el.setAttribute("opacity", "1");
+      put(packet.tag, point.x, point.y - 28);
+      packet.tag.style.opacity = "1";
       if (packet.spec.drop && clamped >= 0.62) {
-        packet.el.setAttribute("opacity", "0.25");
         packet.el.classList.add("is-dropped");
+        packet.tag.textContent = "lost";
       } else {
         packet.el.classList.remove("is-dropped");
+        packet.tag.textContent = packet.spec.label || "";
       }
     }
     function drawPackets() {
@@ -288,12 +400,12 @@
         const t0 = packet.spec.t0;
         const t1 = packet.spec.t1;
         const u = (clock.t - t0) / Math.max(0.001, t1 - t0);
-        if (u < 0) {
+        if (u < 0 || (u > 1 && packet.spec.hideAfter)) {
           packet.el.setAttribute("opacity", "0");
+          packet.tag.style.opacity = "0";
           return;
         }
         place(packet, u > 1 ? 1 : u);
-        if (u > 1 && packet.spec.hideAfter) packet.el.setAttribute("opacity", "0");
       });
     }
 
@@ -302,11 +414,12 @@
     if (window.gsap && packets.length && !reduced()) {
       tween = gsap.to(clock, {
         t: 1,
-        duration: scene.loop ? 3.2 : 2.5,
+        duration: scene.loop ? 3.4 : 2.8,
         ease: "none",
         repeat: scene.loop ? -1 : 0,
         onUpdate: drawPackets
       });
+      gsap.fromTo(wrap, { opacity: 0 }, { opacity: 1, duration: 0.28, ease: "power1.out" });
     } else {
       clock.t = 1;
       drawPackets();
@@ -341,6 +454,7 @@
     return current;
   }
 
+
   function mountBits(root, scene) {
     const wrap = el("div", "bit-stage");
     const head = el("div", "bit-head");
@@ -363,12 +477,11 @@
     const capBits = document.getElementById("diagram-caption");
     if (capBits) capBits.textContent = scene.caption || "";
     if (window.gsap && !reduced()) {
-      gsap.from(wrap.querySelectorAll(".bit.is-diff, .bit.is-on"), {
-        scale: 0.4,
-        opacity: 0.2,
-        duration: 0.35,
-        stagger: 0.004,
-        ease: "power2.out"
+      gsap.from(wrap.querySelectorAll(".bit.is-diff"), {
+        opacity: 0,
+        duration: 0.25,
+        stagger: 0.003,
+        ease: "power1.out"
       });
     }
     current = { replay: function () {}, pause: function () { return false; }, scrub: function () {} };
@@ -390,12 +503,12 @@
     const capBlocks = document.getElementById("diagram-caption");
     if (capBlocks) capBlocks.textContent = scene.caption || "";
     if (window.gsap && !reduced()) {
-      gsap.from(row.children, { y: 16, rotateX: -50, opacity: 0, duration: 0.45, stagger: 0.08, ease: "power2.out" });
+      gsap.from(row.children, { opacity: 0, duration: 0.35, stagger: 0.06, ease: "power1.out" });
     }
     current = {
       replay: function () {
         if (window.gsap && !reduced()) {
-          gsap.fromTo(row.children, { rotateX: 70, opacity: 0.2 }, { rotateX: 0, opacity: 1, duration: 0.4, stagger: 0.06 });
+          gsap.fromTo(row.children, { opacity: 0.2 }, { opacity: 1, duration: 0.35, stagger: 0.05 });
         }
       },
       pause: function () { return false; },
