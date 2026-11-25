@@ -1035,6 +1035,7 @@
         Array.prototype.forEach.call(stepper.children, function (button, stepIndex) {
           if (stepIndex === index) button.setAttribute("aria-current", "step");
           else button.removeAttribute("aria-current");
+          button.classList.toggle("is-done", stepIndex < index);
         });
       }
       if (prev) prev.disabled = index === 0;

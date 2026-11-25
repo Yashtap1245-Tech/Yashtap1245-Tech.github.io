@@ -134,74 +134,194 @@
     svg.append(g);
   }
 
-  function icon(g, mark) {
-    const key = (mark || "").toLowerCase();
-    if (key.indexOf("dns") >= 0 || key === ".") {
-      const c = svgEl("circle", { cx: 0, cy: -6, r: 16, fill: "none" });
-      stroke(c);
-      g.append(c);
-      const h = svgEl("path", { d: "M -16 -6 H 16 M 0 -22 V 10", fill: "none" });
-      stroke(h);
-      g.append(h);
-      return;
-    }
-    if (key.indexOf("443") >= 0 || key === "1.3" || key === "1.2" || key === "lock") {
-      const body = svgEl("rect", { x: -12, y: -4, width: 24, height: 18, rx: 3, fill: "#2a241c" });
-      g.append(body);
-      const shackle = svgEl("path", { d: "M -7 -4 V -12 a 7 7 0 0 1 14 0 V -4", fill: "none" });
-      stroke(shackle);
-      g.append(shackle);
-      return;
-    }
-    const disc = svgEl("circle", { cx: 0, cy: -4, r: 15, fill: "rgba(42,36,28,0.12)" });
-    stroke(disc);
-    g.append(disc);
-    const label = svgEl("text", { x: 0, y: 1, "text-anchor": "middle", class: "face-mark" });
-    label.textContent = (mark || "").slice(0, 3);
-    g.append(label);
+  function hair(node, color) {
+    node.setAttribute("fill", "none");
+    node.setAttribute("stroke", color || "#3a342c");
+    node.setAttribute("stroke-width", "1.6");
+    node.setAttribute("stroke-linejoin", "round");
+    node.setAttribute("stroke-linecap", "round");
+    node.setAttribute("vector-effect", "non-scaling-stroke");
   }
 
-  function drawServer(g, node) {
+  function topGlyph(g, draw) {
+    const ig = svgEl("g", { transform: "matrix(40 0 0 20 0 -2)" });
+    draw(ig);
+    g.append(ig);
+  }
+
+  function glyphGlobe(ig) {
+    const c = svgEl("circle", { cx: 0, cy: 0, r: 0.62 });
+    hair(c);
+    ig.append(c);
+    const e = svgEl("ellipse", { cx: 0, cy: 0, rx: 0.62, ry: 0.26 });
+    hair(e);
+    ig.append(e);
+    const v = svgEl("path", { d: "M 0 -0.62 V 0.62 M -0.62 0 H 0.62" });
+    hair(v);
+    ig.append(v);
+  }
+
+  function glyphRacks(ig) {
+    [-0.42, 0.02].forEach(function (y) {
+      ig.append(svgEl("rect", { x: -0.58, y: y, width: 1.16, height: 0.3, rx: 0.08, fill: "#2c2824" }));
+    });
+  }
+
+  function glyphLock(ig) {
+    ig.append(svgEl("rect", { x: -0.38, y: -0.05, width: 0.76, height: 0.55, rx: 0.08, fill: "#2c2824" }));
+    const s = svgEl("path", { d: "M -0.24 -0.05 V -0.38 a 0.24 0.42 0 0 1 0.48 0 V -0.05" });
+    hair(s);
+    ig.append(s);
+  }
+
+  function glyphEye(ig) {
+    const e = svgEl("ellipse", { cx: 0, cy: 0, rx: 0.7, ry: 0.38 });
+    hair(e);
+    ig.append(e);
+    ig.append(svgEl("circle", { cx: 0, cy: 0, r: 0.16, fill: "#2c2824" }));
+  }
+
+  function glyphSeal(ig) {
+    const c = svgEl("circle", { cx: 0, cy: 0, r: 0.48, fill: "#f4e2a8" });
+    hair(c, "#8a6230");
+    ig.append(c);
+    const star = svgEl("path", { d: "M 0 -0.28 L 0.08 -0.08 L 0.28 -0.08 L 0.12 0.06 L 0.18 0.28 L 0 0.14 L -0.18 0.28 L -0.12 0.06 L -0.28 -0.08 L -0.08 -0.08 Z", fill: "#8a6230" });
+    ig.append(star);
+  }
+
+  function rackSlots(g, w, h, depth) {
+    [0.28, 0.52, 0.76].forEach(function (s) {
+      const x1 = w * 0.82;
+      const y1 = h * 0.18 + depth * s;
+      const x2 = w * 0.18;
+      const y2 = h * 0.82 + depth * s;
+      const line = svgEl("path", { d: "M " + x1 + " " + y1 + " L " + x2 + " " + y2 });
+      hair(line, "rgba(42,36,28,0.45)");
+      g.append(line);
+      g.append(svgEl("circle", { cx: x1 - 4, cy: y1 + 2, r: 2.2, fill: "#7dcea0" }));
+    });
+  }
+
+  function drawCube(g, node, opts) {
     const tone = TONES[node.tone] || TONES.sand;
-    g.append(svgEl("ellipse", { cx: 0, cy: 86, rx: 78, ry: 18, fill: "rgba(70,48,24,0.10)" }));
-    if (node.hot) g.append(svgEl("ellipse", { cx: 0, cy: 86, rx: 86, ry: 20, fill: "rgba(63,160,96,0.28)" }));
-    const w = 86;
-    const h = 40;
-    const depth = 46;
+    const w = opts.w || 78;
+    const h = opts.h || 36;
+    const depth = opts.depth || 52;
+    if (node.hot) g.append(svgEl("ellipse", { cx: 4, cy: h + depth + 10, rx: w + 18, ry: 18, fill: "rgba(72,168,104,0.28)" }));
+    g.append(svgEl("ellipse", { cx: 8, cy: h + depth + 14, rx: w + 8, ry: 16, fill: "rgba(70,50,30,0.12)" }));
     face(g, "M " + (-w) + " 0 L 0 " + h + " L 0 " + (h + depth) + " L " + (-w) + " " + depth + " Z", tone[2]);
     face(g, "M " + w + " 0 L 0 " + h + " L 0 " + (h + depth) + " L " + w + " " + depth + " Z", tone[1]);
     face(g, "M 0 " + (-h) + " L " + w + " 0 L 0 " + h + " L " + (-w) + " 0 Z", tone[0]);
-    icon(g, node.mark);
+    const shine = svgEl("path", { d: "M 0 " + (-h + 3) + " L " + (w - 8) + " -2" });
+    hair(shine, "rgba(255,255,255,0.75)");
+    g.append(shine);
+    if (opts.racks) rackSlots(g, w, h, depth);
+    if (opts.glyph) topGlyph(g, opts.glyph);
   }
 
-  function drawBox(g, w, h, depth, tone, dy) {
-    const y = dy || 0;
-    face(g, "M " + (-w) + " " + y + " L 0 " + (y + h) + " L 0 " + (y + h + depth) + " L " + (-w) + " " + (y + depth) + " Z", tone[2]);
-    face(g, "M " + w + " " + y + " L 0 " + (y + h) + " L 0 " + (y + h + depth) + " L " + w + " " + (y + depth) + " Z", tone[1]);
-    face(g, "M 0 " + (y - h) + " L " + w + " " + y + " L 0 " + (y + h) + " L " + (-w) + " " + y + " Z", tone[0]);
+  function ip(x, y, z) {
+    return [(x - y) * 1.05, (x + y) * 0.5 - z];
   }
 
   function drawLaptop(g) {
-    g.append(svgEl("ellipse", { cx: 8, cy: 118, rx: 130, ry: 22, fill: "rgba(70,48,24,0.12)" }));
-    drawBox(g, 78, 32, 110, ["#f4f0e8", "#3a414a", "#22262c"], -18);
-    face(g, "M 64 -4 L 14 16 L 14 96 L 64 76 Z", "#f7f4ee");
-    const lines = svgEl("path", {
-      d: "M 24 30 H 54 M 24 44 H 46",
-      fill: "none",
-      stroke: "#d5cbbd",
-      "stroke-width": "2.2",
-      "vector-effect": "non-scaling-stroke"
-    });
-    g.append(lines);
-    drawBox(g, 112, 44, 18, ["#f6ead2", "#e4d0aa", "#c9b48e"], 72);
+    g.append(svgEl("ellipse", { cx: 6, cy: 78, rx: 132, ry: 26, fill: "rgba(70,50,30,0.13)" }));
+    const slabTop = [ip(-108, -62, 16), ip(108, -62, 16), ip(108, 64, 16), ip(-108, 64, 16)];
+    const slabBot = [ip(-108, -62, 0), ip(108, -62, 0), ip(108, 64, 0), ip(-108, 64, 0)];
+    face(g, poly([slabTop[0], slabTop[3], slabBot[3], slabBot[0]]), "#e7dcc8");
+    face(g, poly([slabTop[1], slabTop[2], slabBot[2], slabBot[1]]), "#d9cbb3");
+    face(g, poly(slabTop), "#fbf6ee");
+    const deck = [ip(-70, -36, 30), ip(70, -36, 30), ip(70, 40, 30), ip(-70, 40, 30)];
+    const deckBot = [ip(-70, -36, 16), ip(70, -36, 16), ip(70, 40, 16), ip(-70, 40, 16)];
+    face(g, poly([deck[0], deck[3], deckBot[3], deckBot[0]]), "#d7c7a6");
+    face(g, poly([deck[1], deck[2], deckBot[2], deckBot[1]]), "#cbb892");
+    face(g, poly(deck), "#f3e6cc");
     const keys = svgEl("path", {
-      d: "M -50 90 H 58 M -44 100 H 48",
-      fill: "none",
-      stroke: "#b7a488",
-      "stroke-width": "1.7",
-      "vector-effect": "non-scaling-stroke"
+      d: "M " + ip(-40, -8, 31).join(" ") + " L " + ip(36, -8, 31).join(" ") +
+        " M " + ip(-36, 8, 31).join(" ") + " L " + ip(32, 8, 31).join(" ") +
+        " M " + ip(-28, 22, 31).join(" ") + " L " + ip(24, 22, 31).join(" ")
     });
+    hair(keys, "#b7a488");
     g.append(keys);
+    const s0 = ip(-58, -18, 32);
+    const s1 = ip(58, -18, 32);
+    const s2 = ip(54, -30, 118);
+    const s3 = ip(-54, -30, 118);
+    face(g, poly([s0, s1, s2, s3]), "#2c333b");
+    function pull(p, c, k) { return [c[0] + (p[0] - c[0]) * k, c[1] + (p[1] - c[1]) * k]; }
+    const c = [(s0[0] + s1[0] + s2[0] + s3[0]) / 4, (s0[1] + s1[1] + s2[1] + s3[1]) / 4];
+    face(g, poly([pull(s0, c, 0.82), pull(s1, c, 0.82), pull(s2, c, 0.82), pull(s3, c, 0.82)]), "#fbf8f2");
+    const bars = svgEl("path", {
+      d: "M " + pull(s3, c, 0.55).join(" ") + " L " + pull(s2, c, 0.42).join(" ") +
+        " M " + pull(s3, c, 0.4).join(" ") + " L " + pull(s2, c, 0.28).join(" ")
+    });
+    hair(bars, "#d5c7b0");
+    g.append(bars);
+    const bar = svgEl("path", { d: "M " + pull(s0, c, 0.2).join(" ") + " L " + pull(s1, c, 0.2).join(" ") });
+    hair(bar, "#7eb6e0");
+    g.append(bar);
+  }
+
+  function drawPerson(g, tone) {
+    const fill = (TONES[tone] || TONES.sand)[0];
+    g.append(svgEl("ellipse", { cx: 0, cy: 108, rx: 52, ry: 14, fill: "rgba(70,50,30,0.12)" }));
+    const body = svgEl("path", {
+      d: "M -46 96 L -8 48 L 8 48 L 46 96 L 30 124 L -30 124 Z",
+      fill: fill
+    });
+    hair(body);
+    g.append(body);
+    const head = svgEl("circle", { cx: 0, cy: 28, r: 26, fill: "#f3d2b8" });
+    hair(head);
+    g.append(head);
+    const hairline = svgEl("path", { d: "M -18 16 Q 0 4 18 16" });
+    hair(hairline, "#3a342c");
+    g.append(hairline);
+  }
+
+  function drawCertificate(g, node) {
+    const tone = TONES[node.tone] || TONES.green;
+    g.append(svgEl("ellipse", { cx: 6, cy: 78, rx: 70, ry: 14, fill: "rgba(70,50,30,0.12)" }));
+    const card = [ip(-70, -28, 8), ip(54, -28, 8), ip(54, 36, 8), ip(-70, 36, 8)];
+    face(g, poly(card), tone[0]);
+    const lines = svgEl("path", {
+      d: "M " + ip(-48, -8, 10).join(" ") + " L " + ip(20, -8, 10).join(" ") +
+        " M " + ip(-48, 6, 10).join(" ") + " L " + ip(8, 6, 10).join(" ") +
+        " M " + ip(-48, 18, 10).join(" ") + " L " + ip(-4, 18, 10).join(" ")
+    });
+    hair(lines, "#8a8175");
+    g.append(lines);
+    const seal = ip(28, 16, 12);
+    const blob = svgEl("circle", { cx: seal[0], cy: seal[1], r: 12, fill: "#e7b15a" });
+    hair(blob, "#8a6230");
+    g.append(blob);
+  }
+
+  function drawCylinder(g, node) {
+    const tone = TONES[node.tone] || TONES.violet;
+    g.append(svgEl("ellipse", { cx: 4, cy: 78, rx: 62, ry: 14, fill: "rgba(70,50,30,0.12)" }));
+    g.append(svgEl("path", {
+      d: "M -58 8 V 62 A 58 16 0 0 0 58 62 V 8",
+      fill: tone[2],
+      stroke: "#3a342c",
+      "stroke-width": "1.6",
+      "vector-effect": "non-scaling-stroke"
+    }));
+    [24, 42].forEach(function (y) {
+      const line = svgEl("path", { d: "M -58 " + y + " A 58 16 0 0 0 58 " + y });
+      hair(line, "rgba(42,36,28,0.35)");
+      g.append(line);
+    });
+    const top = svgEl("ellipse", { cx: 0, cy: 8, rx: 58, ry: 16, fill: tone[0] });
+    hair(top);
+    g.append(top);
+  }
+
+  function deviceKind(node) {
+    if (node.id === "browser" || node.id === "client") return "laptop";
+    if (node.id === "alice" || node.id === "bob") return "person";
+    if (node.id === "leaf" || node.id === "intermediate" || node.id === "rootca") return "certificate";
+    if ((node.mark || "") === "db" || /database/i.test(node.label || "")) return "cylinder";
+    return "cube";
   }
 
   function addDevice(node) {
@@ -211,9 +331,21 @@
       role: "button"
     });
     g.dataset.id = node.id;
-    const kind = (node.id === "browser" || node.id === "client") ? "laptop" : "cube";
+    const kind = deviceKind(node);
     if (kind === "laptop") drawLaptop(g);
-    else drawServer(g, node);
+    else if (kind === "person") drawPerson(g, node.tone);
+    else if (kind === "certificate") drawCertificate(g, node);
+    else if (kind === "cylinder") drawCylinder(g, node);
+    else {
+      const mark = (node.mark || "").toLowerCase();
+      const id = node.id;
+      let glyph = glyphRacks;
+      if (id === "resolver" || mark.indexOf("dns") >= 0) glyph = glyphGlobe;
+      else if (id === "observer" || mark === "see") glyph = glyphEye;
+      else if (mark.indexOf("lock") >= 0 || id === "server") glyph = glyphLock;
+      else if (id === "root" || id === "rootca") glyph = glyphSeal;
+      drawCube(g, node, { racks: id === "server" || id === "tld", glyph: glyph });
+    }
     g.setAttribute("aria-label", node.label + ". " + (DETAILS[node.id] || node.sub || "Show this machine"));
     return g;
   }
@@ -341,7 +473,7 @@
         const g = nodeEls[node.id];
         const point = points[node.id];
         if (g) g.setAttribute("transform", "translate(" + point.x.toFixed(1) + " " + point.y.toFixed(1) + ")");
-        const drop = (node.id === "browser" || node.id === "client") ? 158 : 112;
+        const drop = (node.id === "browser" || node.id === "client") ? 168 : ((node.id === "alice" || node.id === "bob") ? 148 : 118);
         if (nameEls[node.id]) put(nameEls[node.id], point.x, point.y + drop);
         if (nameEls[node.id + "-sub"]) put(nameEls[node.id + "-sub"], point.x, point.y + drop + 22);
       });

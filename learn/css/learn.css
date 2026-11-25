@@ -820,7 +820,7 @@ body:has(.learn-home) .site-header {
 .cube { cursor: grab; }
 .cube:focus-visible { outline: none; }
 .cube:focus-visible .cube-label { text-decoration: underline; }
-.cube.is-dim { opacity: 0.38; }
+.cube.is-dim { opacity: 1; filter: saturate(0.25) brightness(1.04); }
 .cube-glow { fill: #b7d7c4; opacity: 0.9; }
 .cube-mark { font-family: "Fraunces", Georgia, serif; font-size: 16px; fill: #1a2420; }
 .cube-label { font-family: "Source Sans 3", sans-serif; font-size: 18px; font-weight: 700; fill: #1a2420; }
@@ -828,10 +828,10 @@ body:has(.learn-home) .site-header {
 .link-label { font-family: "Source Sans 3", sans-serif; font-size: 16px; font-weight: 700; fill: #1a2420; }
 .pkt-label { font-size: 15px; }
 
-.pkt circle { fill: #e7a15a; stroke: #1a2420; stroke-width: 1.6; }
-.pkt-res circle { fill: #7dcea0; }
-.pkt-bad circle, .pkt.is-dropped circle { fill: #e07a72; }
-.pkt-lock circle { fill: #24312b; stroke: #e4c48a; }
+.pkt circle { fill: #f3b07a; stroke: #3a342c; stroke-width: 1.5; }
+.pkt-res circle { fill: #9ed18f; }
+.pkt-bad circle, .pkt.is-dropped circle { fill: #e7a09a; }
+.pkt-lock circle { fill: #2c333b; stroke: #e7c56a; }
 .pkt-label { font-family: "Source Sans 3", sans-serif; font-size: 12px; font-weight: 700; fill: #1a2420; }
 
 .vchips, .stage-hud, .stage-tools { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
@@ -850,7 +850,8 @@ body:has(.learn-home) .site-header {
 .vchip { display: flex; flex-direction: column; min-width: 5.6rem; padding: 0.32rem 0.6rem 0.38rem; position: relative; }
 .vchip span { color: #7a7166; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; }
 .vchip b { font-size: 15px; font-weight: 800; }
-.vchip.is-hot { box-shadow: inset 3px 0 0 #3ea05a; }
+.vchip.is-hot { box-shadow: inset 3px 0 0 #3d9a56; border-color: #b7d7c2; }
+.vchip b { font-variant-numeric: tabular-nums; }
 .stage-hud {
   position: static;
   order: 3;
@@ -907,17 +908,57 @@ body:has(.learn-home) .site-header {
   padding: 0.2rem 0 0;
   color: #2c261f;
 }
-.lesson-rail { grid-area: rail; padding: 0.2rem 0.2rem 0; }
-.rail-label { color: #7a7166; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.35rem; }
-.lesson-rail .stepper { margin-top: 0; }
+.lesson-rail {
+  grid-area: rail;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 0.85rem;
+  padding: 0.75rem 0.2rem 0.2rem;
+  border-top: 1px solid #e5d9c8;
+  background: #f3eee6;
+  position: relative;
+  z-index: 2;
+}
+.rail-label {
+  color: #7a7166;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0;
+  white-space: nowrap;
+}
+.lesson-rail .stepper { margin-top: 0; position: relative; flex: 1; }
+.lesson-rail .stepper::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 16px;
+  height: 2px;
+  background: #e5d9c8;
+}
 .lesson-rail .stepper button {
-  width: 34px;
-  min-width: 34px;
-  height: 34px;
-  min-height: 34px;
-  border-color: #ddd4c6;
-  background: #fffaf3;
+  position: relative;
+  z-index: 1;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  min-height: 32px;
+  border: 1.5px solid #d9d0c4;
+  background: #fff;
   color: #2c261f;
+  font-weight: 700;
+}
+.lesson-rail .stepper button.is-done {
+  border-color: #3d9a56;
+  color: #2f7a45;
+}
+.lesson-rail .stepper button[aria-current="step"] {
+  background: #3d9a56;
+  border-color: #3d9a56;
+  color: #fff;
 }
 .key-idea {
   background: #e7f6ea;
@@ -986,6 +1027,7 @@ body:has(.learn-home) .site-header {
   .bit-grid { grid-template-columns: repeat(16, 1fr); }
   .stage { grid-template-columns: 1fr; grid-template-areas: "diagram" "copy" "rail"; }
   .iso-name { font-size: 13px; }
+  .vchips { position: static; max-width: none; margin: 0.55rem 0.55rem 0; }
 }
 
 @media print {
