@@ -383,6 +383,21 @@
       svg.append(path);
       linkEls[link.from + ">" + link.to] = path;
     });
+    (scene.packets || []).forEach(function (spec) {
+      const key = spec.from + ">" + spec.to;
+      if (linkEls[key]) return;
+      const path = svgEl("path", {
+        class: "iso-link iso-link-solid",
+        d: "M0 0",
+        fill: "none",
+        "vector-effect": "non-scaling-stroke"
+      });
+      path.dataset.from = spec.from;
+      path.dataset.to = spec.to;
+      svg.append(path);
+      linkEls[key] = path;
+      scene.links.push({ from: spec.from, to: spec.to, style: "solid" });
+    });
     const labels = el("div", "iso-labels");
     const nodeEls = {};
     const nameEls = {};
@@ -699,12 +714,67 @@
     const packets = [];
     const chips = [{ k: "Name", v: host }];
     if (frame === "parse") {
-      dim(["browser"]);
-      chips.push({ k: "Sent", v: "0", hot: true });
-    } else if (frame === "cache") {
-      dim(["browser"]);
-      chips.push({ k: "Cache", v: "miss", hot: true });
-    } else if (frame === "resolver") {
+      return {
+        caption: "The browser splits the URL before it sends anything. https, the host, port 443, and /docs.",
+        chips: [
+          { k: "Scheme", v: "https" },
+          { k: "Host", v: host, hot: true },
+          { k: "Port", v: "443" },
+          { k: "Path", v: "/docs" }
+        ],
+        nodes: [
+          { id: "browser", gx: 0, gy: 1, label: "Browser", mark: "you", tone: "sand", hot: true },
+          { id: "scheme", gx: 1.6, gy: 0, label: "https", mark: "url", tone: "sand" },
+          { id: "hostn", gx: 3, gy: 0.3, label: host, mark: "name", tone: "amber", hot: true },
+          { id: "portn", gx: 2.8, gy: 1.6, label: "port 443", mark: "443", tone: "blue" },
+          { id: "pathn", gx: 1.2, gy: 1.8, label: "/docs", mark: "path", tone: "green" }
+        ],
+        links: [
+          { from: "browser", to: "scheme", style: "dashed", label: "scheme" },
+          { from: "browser", to: "hostn", style: "solid", label: "host" },
+          { from: "browser", to: "portn", style: "dashed", label: "port" },
+          { from: "browser", to: "pathn", style: "dashed", label: "path" }
+        ],
+        packets: []
+      };
+    }
+    if (frame === "cache") {
+      const stores = [
+        { id: "browser", gx: 0, gy: 1.2, label: "Browser", mark: "you", tone: "sand", hot: !hit },
+        { id: "bcache", gx: 1.6, gy: 0.2, label: "Browser cache", mark: "TTL", tone: "green", hot: true },
+        { id: "oscache", gx: 3.1, gy: 0.5, label: "OS cache", mark: "OS", tone: "blue", hot: !hit },
+        { id: "hosts", gx: 2.4, gy: 1.8, label: "Hosts file", mark: "file", tone: "amber", hot: !hit }
+      ];
+      if (hit) {
+        return {
+          caption: "The browser cache already has a fresh answer. The lookup stops. The OS cache and the hosts file are not asked.",
+          chips: [{ k: "Browser cache", v: "hit", hot: true }, { k: "Sent", v: "0" }],
+          nodes: stores,
+          links: [{ from: "bcache", to: "browser", style: "solid", label: "fresh" }],
+          packets: [{ from: "bcache", to: "browser", kind: "res", label: host + " fresh", t0: 0.08, t1: 0.75 }]
+        };
+      }
+      return {
+        caption: "Browser cache misses, then the OS cache misses, then the hosts file has no entry. Nothing has left the machine yet.",
+        chips: [{ k: "Browser cache", v: "miss", hot: true }, { k: "OS cache", v: "miss" }, { k: "Hosts", v: "no entry" }],
+        nodes: stores,
+        links: [
+          { from: "browser", to: "bcache", style: "solid" },
+          { from: "bcache", to: "browser", style: "solid" },
+          { from: "browser", to: "oscache", style: "solid" },
+          { from: "oscache", to: "browser", style: "solid" },
+          { from: "browser", to: "hosts", style: "solid" }
+        ],
+        packets: [
+          { from: "browser", to: "bcache", kind: "req", label: "browser cache?", t0: 0.02, t1: 0.2 },
+          { from: "bcache", to: "browser", kind: "bad", label: "miss", t0: 0.22, t1: 0.38 },
+          { from: "browser", to: "oscache", kind: "req", label: "OS cache?", t0: 0.4, t1: 0.58 },
+          { from: "oscache", to: "browser", kind: "bad", label: "miss", t0: 0.6, t1: 0.74 },
+          { from: "browser", to: "hosts", kind: "req", label: "hosts file?", t0: 0.76, t1: 0.95 }
+        ]
+      };
+    }
+    if (frame === "resolver") {
       dim(["browser", "resolver"]);
       links.push({ from: "browser", to: "resolver", style: "solid" });
       packets.push({ from: "browser", to: "resolver", kind: "req", label: host + "?", t0: 0.05, t1: 0.85 });
@@ -722,13 +792,21 @@
     } else if (frame === "auth") {
       dim(["resolver", "auth"]);
       links.push({ from: "resolver", to: "auth", style: "solid" });
-      packets.push({ from: "resolver", to: "auth", kind: "req", label: "A?", t0: 0.02, t1: 0.45 });
-      packets.push({ from: "auth", to: "resolver", kind: "res", label: "203.0.113.10", t0: 0.5, t1: 0.95 });
-      chips.push({ k: "TTL", v: "300 s", hot: true });
+      packets.push({ from: "resolver", to: "auth", kind: "req", label: "A and AAAA?", t0: 0.02, t1: 0.4 });
+      packets.push({ from: "auth", to: "resolver", kind: "res", label: "A 203.0.113.10", t0: 0.42, t1: 0.68 });
+      packets.push({ from: "auth", to: "resolver", kind: "res", label: "AAAA 2001:db8::10", t0: 0.7, t1: 0.95 });
+      chips.push({ k: "A", v: "203.0.113.10", hot: true }, { k: "AAAA", v: "2001:db8::10" }, { k: "TTL", v: "300 s" });
     } else if (frame === "answer") {
-      dim(["resolver", "browser"]);
-      links.push({ from: "resolver", to: "browser", style: "solid", label: "cached for TTL" });
-      packets.push({ from: "resolver", to: "browser", kind: "res", label: "203.0.113.10", t0: 0.08, t1: 0.8 });
+      return {
+        caption: "The resolver returns 203.0.113.10 and keeps it for the TTL. The browser can now open port 443. The page is still not fetched.",
+        chips: [{ k: "Address", v: "203.0.113.10", hot: true }, { k: "TTL", v: "300 s" }, { k: "Port", v: "443" }],
+        nodes: [
+          { id: "resolver", gx: 0.2, gy: 0.4, label: "Resolver cache", mark: "TTL", tone: "amber", hot: true },
+          { id: "browser", gx: 2.4, gy: 1.2, label: "Browser", mark: "you", tone: "sand", hot: true }
+        ],
+        links: [{ from: "resolver", to: "browser", style: "solid", label: "TTL 300s" }],
+        packets: [{ from: "resolver", to: "browser", kind: "res", label: "203.0.113.10", t0: 0.08, t1: 0.8 }]
+      };
     } else {
       nodes.forEach(function (node) { node.dim = false; node.hot = false; });
       nodes[0].hot = true;
@@ -758,8 +836,8 @@
   function tcpScene(frame, state) {
     const drop = Boolean(state && state.drop);
     const nodes = [
-      { id: "client", gx: 0.2, gy: 1.4, label: "Browser", mark: "you", tone: "sand", hot: true },
-      { id: "server", gx: 3.3, gy: 0.3, label: "Server", mark: ":443", tone: "blue", hot: true }
+      { id: "client", gx: 0.2, gy: 1.4, label: "Browser :51422", mark: "you", tone: "sand", hot: true },
+      { id: "server", gx: 3.3, gy: 0.3, label: "Server :443", mark: ":443", tone: "blue", hot: true }
     ];
     const link = [{ from: "client", to: "server", style: "solid" }];
     let packets = [];

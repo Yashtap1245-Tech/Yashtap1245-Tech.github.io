@@ -1179,6 +1179,34 @@
       renderFrame(steps[index].dataset.frame || "");
     });
     const stageEl = document.querySelector(".stage");
+    if (stageEl && !document.querySelector(".control-bar")) {
+      const bar = document.createElement("div");
+      bar.className = "control-bar";
+      bar.setAttribute("role", "toolbar");
+      bar.setAttribute("aria-label", "Lesson controls");
+      const left = document.createElement("div");
+      left.className = "control-group";
+      const mid = document.createElement("div");
+      mid.className = "control-group control-grow";
+      const right = document.createElement("div");
+      right.className = "control-group control-end";
+      ["prev", "replay", "play"].forEach(function (id) {
+        const button = document.getElementById(id);
+        if (button) left.append(button);
+      });
+      const pause = document.getElementById("stage-pause");
+      if (pause) left.append(pause);
+      const scrub = document.querySelector(".scrub");
+      const hudBar = document.getElementById("stage-hud");
+      if (scrub) mid.append(scrub);
+      if (hudBar) mid.append(hudBar);
+      const nextBtn = document.getElementById("next");
+      if (nextBtn) right.append(nextBtn);
+      bar.append(left, mid, right);
+      stageEl.append(bar);
+      const tools = document.querySelector(".stage-tools");
+      if (tools) tools.hidden = true;
+    }
     if (stageEl && stepper && !document.querySelector(".lesson-rail")) {
       const rail = document.createElement("div");
       rail.className = "lesson-rail";

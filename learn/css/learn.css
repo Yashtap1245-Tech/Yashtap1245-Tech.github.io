@@ -423,6 +423,7 @@ code {
   margin-bottom: 0.35rem;
 }
 
+.controls:empty { display: none; }
 .controls {
   display: flex;
   flex-wrap: wrap;
@@ -748,6 +749,7 @@ body:has(.learn-home) .site-header {
   grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
   grid-template-areas:
     "diagram copy"
+    "controls controls"
     "rail rail";
   gap: 0.35rem 1rem;
   align-items: start;
@@ -755,6 +757,7 @@ body:has(.learn-home) .site-header {
 
 .diagram-panel {
   grid-area: diagram;
+  top: auto;
   min-height: 0;
   background: #f7f1e6;
   color: #2c261f;
@@ -861,7 +864,13 @@ body:has(.learn-home) .site-header {
 }
 #diagram { order: 2; flex: 1; display: flex; flex-direction: column; min-height: 0; }
 .scrub { order: 4; }
-#diagram-caption { order: 5; }
+#diagram-caption {
+  order: 5;
+  margin: 0.35rem 0.9rem 0.8rem;
+  max-width: 68ch;
+  line-height: 1.45;
+  color: #3a332c;
+}
 .node-detail { order: 6; }
 .stage-hud input, .stage-hud button { min-height: 40px; }
 .stage-hud input {
@@ -877,7 +886,7 @@ body:has(.learn-home) .site-header {
   background: #1a2420;
   color: #f6f1e6;
 }
-.stage-tools { position: absolute; top: 12px; right: 12px; z-index: 3; }
+.stage-tools { display: none !important; }
 .stage-tools button { border-radius: 999px; background: #fff; }
 .scrub { display: flex; align-items: center; gap: 0.55rem; margin: 0.35rem 0.8rem 0.2rem; color: #6a6156; }
 .scrub input { flex: 1; min-height: 36px; accent-color: #8a5418; }
@@ -908,6 +917,42 @@ body:has(.learn-home) .site-header {
   padding: 0.2rem 0 0;
   color: #2c261f;
 }
+.control-bar {
+  grid-area: controls;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 0.7rem;
+  margin-top: 0.75rem;
+  padding: 0.55rem 0.7rem;
+  background: #f6f1e6;
+  border: 1px solid #e4d9c8;
+  border-radius: 14px;
+}
+.control-group { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; }
+.control-grow { flex: 1 1 16rem; }
+.control-end { margin-left: auto; }
+.control-bar button,
+.control-bar .stage-hud button {
+  min-height: 44px;
+  padding: 0 0.95rem;
+  border-radius: 999px;
+  border: 1px solid #d7cec2;
+  background: #fff;
+  color: #2c261f;
+  font: inherit;
+  font-weight: 700;
+}
+.control-bar #next {
+  background: #3d9a56;
+  border-color: #2f7a45;
+  color: #fff;
+  min-width: 7.5rem;
+}
+.control-bar .scrub { flex: 1; min-width: 9rem; margin: 0; }
+.control-bar .stage-hud { margin: 0; }
+.control-hint { max-width: 62ch; }
+
 .lesson-rail {
   grid-area: rail;
   display: flex;
@@ -971,14 +1016,11 @@ body:has(.learn-home) .site-header {
   font-weight: 500;
 }
 .key-label { color: #2f7a45; }
-.step p:not(.key-idea) {
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+.step p {
+  max-width: 62ch;
+  line-height: 1.55;
 }
-.step p:not(.key-idea) + p:not(.key-idea) { display: none; }
-.step h2 { font-size: clamp(1.45rem, 2vw, 1.9rem); }
+.step h2 { font-size: clamp(1.45rem, 2vw, 1.9rem); max-width: 22ch; }
 
 .bit-stage { gap: 0.7rem; }
 .bit-count { font-family: "Fraunces", Georgia, serif; font-size: clamp(1.4rem, 2.5vw, 2rem); letter-spacing: -0.03em; }
@@ -1025,7 +1067,9 @@ body:has(.learn-home) .site-header {
   .iso-svg { height: auto; max-height: none; }
   .stage-tools { position: static; margin: 0.35rem 0; }
   .bit-grid { grid-template-columns: repeat(16, 1fr); }
-  .stage { grid-template-columns: 1fr; grid-template-areas: "diagram" "copy" "rail"; }
+  .stage { grid-template-columns: 1fr; grid-template-areas: "diagram" "controls" "copy" "rail"; }
+  .control-end { margin-left: 0; width: 100%; }
+  .control-bar #next { width: 100%; }
   .iso-name { font-size: 13px; }
   .vchips { position: static; max-width: none; margin: 0.55rem 0.55rem 0; }
 }
